@@ -1,0 +1,127 @@
+{
+  "version": "2026.10.2",
+  "faults": [
+    {
+      "id": "software_instability",
+      "name": "Software instability",
+      "description": "Apps or the operating system crash, freeze, drain power or behave erratically because of software rather than failing hardware.",
+      "repair_types": ["software_reset"],
+      "components": [],
+      "self_help": [
+        "Update the operating system and the affected apps.",
+        "Restart in Safe Mode to check whether a third-party app is responsible.",
+        "Clear the cache/data of the crashing app, or uninstall recently installed apps.",
+        "Back up your data, then consider a factory reset as a last resort."
+      ],
+      "related_checks": ["stability.crashes", "stability.boot", "memory.ram"]
+    },
+    {
+      "id": "storage_pressure",
+      "name": "Storage nearly full",
+      "description": "Very little free internal storage, which slows the phone and causes updates and apps to fail.",
+      "repair_types": [],
+      "components": [],
+      "self_help": [
+        "Move photos and videos to cloud storage or a computer.",
+        "Delete unused apps and large downloads.",
+        "Clear app caches from Settings > Storage."
+      ],
+      "related_checks": ["storage.data"]
+    },
+    {
+      "id": "battery_wear",
+      "name": "Battery wear or battery fault",
+      "description": "The battery holds less charge than it should, cannot deliver peak power, or reports a fault.",
+      "repair_types": ["battery_replacement"],
+      "components": ["main_battery", "service_battery"],
+      "self_help": [
+        "Check Settings > Battery for apps with unusually high usage.",
+        "If the battery or case is swelling, stop using and charging the phone and seek professional help."
+      ],
+      "related_checks": ["battery.status", "battery.capacity", "stability.boot", "thermal.status"]
+    },
+    {
+      "id": "charging_path",
+      "name": "Charging port or charging circuit issue",
+      "description": "Power is not reaching the battery reliably through the charging port, cable or charging circuit.",
+      "repair_types": ["charging_port_replacement"],
+      "components": ["service_charging_port"],
+      "self_help": [
+        "Try a different cable and charger known to work with another phone.",
+        "Inspect the port with a light; remove lint carefully with a wooden or plastic toothpick (power off first)."
+      ],
+      "related_checks": ["charging.state", "battery.status"]
+    },
+    {
+      "id": "display_damage",
+      "name": "Display or touchscreen damage",
+      "description": "The screen glass, display panel or touch layer is damaged or faulty.",
+      "repair_types": ["screen_replacement"],
+      "components": ["display_assembly", "service_screen", "oled_panel"],
+      "self_help": [
+        "Remove any screen protector and case to rule out pressure or a damaged protector.",
+        "Restart the phone; if touch problems disappear after a restart, the cause may be software."
+      ],
+      "related_checks": ["input.touchscreen"]
+    },
+    {
+      "id": "camera_fault",
+      "name": "Camera issue",
+      "description": "A camera module, lens or the camera software is not working correctly.",
+      "repair_types": ["camera_module_replacement"],
+      "components": ["camera_wide", "camera_rear", "camera_ultrawide", "camera_tele", "camera_macro", "camera_depth", "service_camera_rear", "service_camera_front"],
+      "self_help": [
+        "Clean the lens with a microfibre cloth.",
+        "Clear the Camera app's cache and data, and test a third-party camera app."
+      ],
+      "related_checks": ["camera.enumeration"]
+    },
+    {
+      "id": "audio_fault",
+      "name": "Speaker or microphone issue",
+      "description": "The loudspeaker, earpiece or microphone is blocked, damaged or not working.",
+      "repair_types": ["audio_component_replacement"],
+      "components": ["service_audio"],
+      "self_help": [
+        "Gently clean speaker and microphone openings with a soft dry brush.",
+        "Disconnect Bluetooth devices, which can silently take over audio."
+      ],
+      "related_checks": []
+    },
+    {
+      "id": "connectivity_issue",
+      "name": "Cellular or Wi-Fi connectivity issue",
+      "description": "The phone has trouble with mobile signal, the SIM, mobile data or Wi-Fi.",
+      "repair_types": ["professional_diagnosis"],
+      "components": [],
+      "self_help": [
+        "Toggle Airplane mode off and on, and restart the phone.",
+        "Re-seat the SIM card, or test with another SIM.",
+        "Reset network settings (this forgets saved Wi-Fi networks)."
+      ],
+      "related_checks": ["connectivity.basic"]
+    },
+    {
+      "id": "liquid_damage",
+      "name": "Possible liquid damage",
+      "description": "Exposure to water or other liquids may have caused corrosion or short circuits; effects can appear days later.",
+      "repair_types": ["liquid_damage_service"],
+      "components": ["service_liquid"],
+      "self_help": [
+        "If exposure was recent: power the phone off, do not charge it, and let it dry. Do not use heat or rice as a cure.",
+        "Have it inspected promptly; corrosion gets worse over time."
+      ],
+      "related_checks": []
+    }
+  ],
+  "repair_types": [
+    {"id": "battery_replacement", "name": "Battery replacement", "professional": true},
+    {"id": "charging_port_replacement", "name": "Charging port replacement", "professional": true},
+    {"id": "screen_replacement", "name": "Screen (display + touch) replacement", "professional": true},
+    {"id": "camera_module_replacement", "name": "Camera module replacement", "professional": true},
+    {"id": "audio_component_replacement", "name": "Speaker / microphone replacement", "professional": true},
+    {"id": "liquid_damage_service", "name": "Liquid damage cleaning and inspection", "professional": true},
+    {"id": "software_reset", "name": "Software repair / reset service", "professional": false},
+    {"id": "professional_diagnosis", "name": "Bench diagnosis by a technician", "professional": true}
+  ]
+}

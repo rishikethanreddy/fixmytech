@@ -1,0 +1,379 @@
+{
+  "version": "2026.10.1",
+  "tests": [
+    {
+      "id": "display_colors",
+      "title": "Screen colours and dead pixels",
+      "category": "display",
+      "method": "phone_browser",
+      "summary": "The phone shows solid full-screen colours one after another so you can look for lines, spots, dead pixels or uneven patches.",
+      "instructions": [
+        "Turn the screen brightness up.",
+        "Tap through each colour and look closely at the whole screen, including the edges."
+      ],
+      "requires": [],
+      "measures": [],
+      "outcomes": [
+        {
+          "value": "pass",
+          "label": "Every colour looked even and clean"
+        },
+        {
+          "value": "fail",
+          "label": "I saw lines, spots, dead pixels or patches"
+        }
+      ],
+      "targets": [
+        "display_damage"
+      ]
+    },
+    {
+      "id": "touch_grid",
+      "title": "Touchscreen coverage",
+      "category": "display",
+      "method": "phone_browser",
+      "summary": "Drag your finger over every square of a grid. The phone records which squares registered a touch.",
+      "instructions": [
+        "Slowly drag one finger across every square until it turns green.",
+        "If some squares never turn green, finish the test anyway."
+      ],
+      "requires": [
+        "touch"
+      ],
+      "measures": [
+        "cells_total",
+        "cells_touched",
+        "coverage_pct",
+        "max_simultaneous_touches"
+      ],
+      "outcomes": [
+        {
+          "value": "pass",
+          "label": "All squares responded"
+        },
+        {
+          "value": "fail",
+          "label": "Some squares would not respond"
+        }
+      ],
+      "targets": [
+        "display_damage"
+      ]
+    },
+    {
+      "id": "speaker",
+      "title": "Loudspeaker",
+      "category": "audio",
+      "method": "phone_browser",
+      "summary": "The phone plays three short tones through its loudspeaker.",
+      "instructions": [
+        "Disconnect Bluetooth headphones and turn the media volume up.",
+        "Listen to each tone."
+      ],
+      "requires": [
+        "webaudio"
+      ],
+      "measures": [],
+      "outcomes": [
+        {
+          "value": "pass",
+          "label": "All tones were clear"
+        },
+        {
+          "value": "partial",
+          "label": "Tones were quiet, crackly or distorted"
+        },
+        {
+          "value": "fail",
+          "label": "I heard nothing"
+        }
+      ],
+      "targets": [
+        "audio_fault"
+      ]
+    },
+    {
+      "id": "microphone",
+      "title": "Microphone",
+      "category": "audio",
+      "method": "phone_browser",
+      "summary": "With your permission the phone listens for a few seconds and measures how loud your voice is. Nothing is recorded or sent.",
+      "instructions": [
+        "Allow microphone access when asked.",
+        "Speak normally towards the bottom of the phone for 5 seconds."
+      ],
+      "requires": [
+        "microphone",
+        "secure_context"
+      ],
+      "measures": [
+        "peak_level_dbfs",
+        "samples"
+      ],
+      "outcomes": [
+        {
+          "value": "pass",
+          "label": "The level meter moved when I spoke"
+        },
+        {
+          "value": "fail",
+          "label": "The meter barely moved"
+        }
+      ],
+      "targets": [
+        "audio_fault"
+      ]
+    },
+    {
+      "id": "camera_rear",
+      "title": "Rear camera",
+      "category": "camera",
+      "method": "phone_browser",
+      "summary": "With your permission the page opens the rear camera preview. No photo is taken or sent.",
+      "instructions": [
+        "Allow camera access when asked.",
+        "Point the camera at text about 30 cm away and check it is sharp."
+      ],
+      "requires": [
+        "camera",
+        "secure_context"
+      ],
+      "measures": [
+        "stream_started",
+        "width",
+        "height"
+      ],
+      "outcomes": [
+        {
+          "value": "pass",
+          "label": "The preview was clear and sharp"
+        },
+        {
+          "value": "partial",
+          "label": "The preview worked but was blurry, dark or stained"
+        },
+        {
+          "value": "fail",
+          "label": "The camera did not start or stayed black"
+        }
+      ],
+      "targets": [
+        "camera_fault"
+      ]
+    },
+    {
+      "id": "camera_front",
+      "title": "Front camera",
+      "category": "camera",
+      "method": "phone_browser",
+      "summary": "With your permission the page opens the front (selfie) camera preview. No photo is taken or sent.",
+      "instructions": [
+        "Allow camera access when asked.",
+        "Check that your face appears clearly."
+      ],
+      "requires": [
+        "camera",
+        "secure_context"
+      ],
+      "measures": [
+        "stream_started",
+        "width",
+        "height"
+      ],
+      "outcomes": [
+        {
+          "value": "pass",
+          "label": "The preview was clear"
+        },
+        {
+          "value": "partial",
+          "label": "It worked but was blurry or dark"
+        },
+        {
+          "value": "fail",
+          "label": "The camera did not start or stayed black"
+        }
+      ],
+      "targets": [
+        "camera_fault"
+      ]
+    },
+    {
+      "id": "vibration",
+      "title": "Vibration motor",
+      "category": "peripherals",
+      "method": "phone_browser",
+      "summary": "The phone vibrates in a short pattern.",
+      "instructions": [
+        "Hold the phone in your hand and make sure silent/do-not-disturb modes are off."
+      ],
+      "requires": [
+        "vibrate"
+      ],
+      "measures": [],
+      "outcomes": [
+        {
+          "value": "pass",
+          "label": "I felt the vibrations"
+        },
+        {
+          "value": "fail",
+          "label": "I felt nothing"
+        }
+      ],
+      "targets": []
+    },
+    {
+      "id": "motion_sensors",
+      "title": "Motion sensors",
+      "category": "sensors",
+      "method": "phone_browser",
+      "summary": "Reads the accelerometer while you tilt the phone. Values stay on the phone except a short summary.",
+      "instructions": [
+        "Allow motion access if asked.",
+        "Slowly tilt and turn the phone for a few seconds."
+      ],
+      "requires": [
+        "motion",
+        "secure_context"
+      ],
+      "measures": [
+        "events_received",
+        "gravity_ms2"
+      ],
+      "outcomes": [
+        {
+          "value": "pass",
+          "label": "The readings changed as I moved the phone"
+        },
+        {
+          "value": "fail",
+          "label": "No readings, or they never changed"
+        }
+      ],
+      "targets": []
+    },
+    {
+      "id": "charging_connector",
+      "title": "Charging connector test",
+      "category": "charging",
+      "method": "agent_assisted",
+      "summary": "Keep the phone connected to this computer. For about 45 seconds, gently move the plug up, down and sideways at the phone end. The agent reads the phone's own charging status every second and counts how often the connection drops.",
+      "instructions": [
+        "Works best when the battery is below 80% (many phones pause charging above that).",
+        "Move the plug gently; never force or bend it.",
+        "Stop if the phone, cable or port becomes hot."
+      ],
+      "requires": [
+        "agent"
+      ],
+      "measures": [
+        "samples",
+        "charging_observed",
+        "plug_events",
+        "adb_disconnects",
+        "level_delta",
+        "max_temperature_c",
+        "start_level_pct"
+      ],
+      "outcomes": [
+        {
+          "value": "pass",
+          "label": "Charging stayed connected"
+        },
+        {
+          "value": "partial",
+          "label": "The connection dropped while the plug was moved"
+        },
+        {
+          "value": "fail",
+          "label": "Connected but the phone never charged"
+        }
+      ],
+      "targets": [
+        "charging_path",
+        "battery_wear"
+      ]
+    },
+    {
+      "id": "earpiece_call",
+      "title": "Earpiece (call speaker)",
+      "category": "audio",
+      "method": "manual",
+      "summary": "Call your voicemail or a friend and listen through the earpiece at the top of the phone (not speakerphone).",
+      "instructions": [
+        "Make a short call with the phone held to your ear.",
+        "Check whether you hear the other side clearly."
+      ],
+      "requires": [],
+      "measures": [],
+      "outcomes": [
+        {
+          "value": "pass",
+          "label": "Clear sound in the earpiece"
+        },
+        {
+          "value": "partial",
+          "label": "Quiet or crackly"
+        },
+        {
+          "value": "fail",
+          "label": "No sound in the earpiece"
+        }
+      ],
+      "targets": [
+        "audio_fault"
+      ]
+    },
+    {
+      "id": "buttons",
+      "title": "Physical buttons",
+      "category": "peripherals",
+      "method": "manual",
+      "summary": "Press volume up, volume down and the power button one at a time.",
+      "instructions": [
+        "The volume slider should appear for the volume buttons; the screen should turn off/on for power."
+      ],
+      "requires": [],
+      "measures": [],
+      "outcomes": [
+        {
+          "value": "pass",
+          "label": "All buttons respond"
+        },
+        {
+          "value": "fail",
+          "label": "At least one button doesn't respond or sticks"
+        }
+      ],
+      "targets": []
+    },
+    {
+      "id": "mobile_data",
+      "title": "Mobile data",
+      "category": "connectivity",
+      "method": "manual",
+      "summary": "Turn Wi-Fi off and open a website using mobile data only.",
+      "instructions": [
+        "Turn off Wi-Fi.",
+        "Open any website in the browser.",
+        "Turn Wi-Fi back on afterwards."
+      ],
+      "requires": [],
+      "measures": [],
+      "outcomes": [
+        {
+          "value": "pass",
+          "label": "The website loaded on mobile data"
+        },
+        {
+          "value": "fail",
+          "label": "It did not load (and my plan has data)"
+        }
+      ],
+      "targets": [
+        "connectivity_issue"
+      ]
+    }
+  ]
+}

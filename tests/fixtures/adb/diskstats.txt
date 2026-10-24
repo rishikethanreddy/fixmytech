@@ -1,0 +1,6 @@
+Latency: 3ms [512B Data Write]
+Recent Disk Write Speed (kB/s) = 248331
+Data-Free: 4770100K / 115404100K total = 4% free
+Cache-Free: 0K / 0K total = 0% free
+System-Free: 0K / 6377512K total = 0% free
+File-based Encryption: true

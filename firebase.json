@@ -1,0 +1,9 @@
+{
+  "hosting": {
+    "public": "hosting_stub",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      { "source": "**", "run": { "serviceId": "fixmytech", "region": "asia-south1" } }
+    ]
+  }
+}

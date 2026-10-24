@@ -1,0 +1,17 @@
+manufacturer,model,repair_type,region,currency,parts_low,parts_high,labor_low,labor_high,source,source_date,is_illustrative,notes
+*,*,battery_replacement,US,USD,20,70,20,50,DEMO_FIXTURE_NOT_MARKET_DATA,2026-10-19,true,Wide placeholder range for development; replace with verified shop or manufacturer pricing
+*,*,charging_port_replacement,US,USD,10,50,30,70,DEMO_FIXTURE_NOT_MARKET_DATA,2026-10-19,true,Wide placeholder range; many devices have the port on a sub-board which is cheaper than mainboard-soldered ports
+*,*,screen_replacement,US,USD,60,300,30,80,DEMO_FIXTURE_NOT_MARKET_DATA,2026-10-19,true,OLED flagship screens sit at the top of the range or above it
+*,*,camera_module_replacement,US,USD,25,180,25,60,DEMO_FIXTURE_NOT_MARKET_DATA,2026-10-19,true,Depends heavily on which camera; lens-cover-only repairs are cheaper
+*,*,audio_component_replacement,US,USD,10,50,25,60,DEMO_FIXTURE_NOT_MARKET_DATA,2026-10-19,true,Often resolved by cleaning the grille before any part is replaced
+*,*,liquid_damage_service,US,USD,0,60,50,120,DEMO_FIXTURE_NOT_MARKET_DATA,2026-10-19,true,Covers cleaning and inspection only; parts damaged by corrosion are extra
+*,*,software_reset,US,USD,0,0,0,50,DEMO_FIXTURE_NOT_MARKET_DATA,2026-10-19,true,Free if done yourself after backing up
+*,*,professional_diagnosis,US,USD,0,0,0,50,DEMO_FIXTURE_NOT_MARKET_DATA,2026-10-19,true,Many shops waive the fee if you proceed with the repair
+*,*,battery_replacement,IN,INR,800,4500,300,1200,DEMO_FIXTURE_NOT_MARKET_DATA,2026-10-19,true,Wide placeholder range for development; replace with verified shop or manufacturer pricing
+*,*,charging_port_replacement,IN,INR,300,2000,300,1000,DEMO_FIXTURE_NOT_MARKET_DATA,2026-10-19,true,Wide placeholder range for development
+*,*,screen_replacement,IN,INR,2000,22000,500,2000,DEMO_FIXTURE_NOT_MARKET_DATA,2026-10-19,true,OLED flagship screens sit at the top of the range or above it
+*,*,camera_module_replacement,IN,INR,800,9000,300,1200,DEMO_FIXTURE_NOT_MARKET_DATA,2026-10-19,true,Depends heavily on which camera
+*,*,audio_component_replacement,IN,INR,300,1800,300,800,DEMO_FIXTURE_NOT_MARKET_DATA,2026-10-19,true,Often resolved by cleaning the grille
+*,*,liquid_damage_service,IN,INR,0,2000,700,2500,DEMO_FIXTURE_NOT_MARKET_DATA,2026-10-19,true,Cleaning and inspection only
+*,*,software_reset,IN,INR,0,0,0,800,DEMO_FIXTURE_NOT_MARKET_DATA,2026-10-19,true,Free if done yourself after backing up
+*,*,professional_diagnosis,IN,INR,0,0,0,500,DEMO_FIXTURE_NOT_MARKET_DATA,2026-10-19,true,Often waived if you proceed with the repair

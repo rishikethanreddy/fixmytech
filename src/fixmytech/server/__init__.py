@@ -1,0 +1,1 @@
+"""FixMyTech backend (FastAPI)."""

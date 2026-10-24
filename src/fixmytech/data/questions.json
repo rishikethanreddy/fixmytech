@@ -1,0 +1,1091 @@
+{
+  "version": "2026.10.1",
+  "settings": {
+    "max_questions": 12,
+    "min_questions": 3,
+    "confident_margin": 3.0,
+    "min_utility": 0.4
+  },
+  "questions": [
+    {
+      "id": "primary_symptoms",
+      "text": "Which problems are you noticing?",
+      "help": "Select everything that applies. This decides which follow-up questions are useful.",
+      "type": "multi_choice",
+      "priority": 100,
+      "targets": [
+        "software_instability",
+        "storage_pressure",
+        "battery_wear",
+        "charging_path",
+        "display_damage",
+        "camera_fault",
+        "audio_fault",
+        "connectivity_issue",
+        "liquid_damage"
+      ],
+      "options": [
+        {
+          "value": "battery_drain",
+          "label": "Battery drains quickly"
+        },
+        {
+          "value": "not_charging",
+          "label": "Won't charge, or charges slowly"
+        },
+        {
+          "value": "overheating",
+          "label": "Gets unusually hot"
+        },
+        {
+          "value": "shutdowns",
+          "label": "Turns off or restarts by itself"
+        },
+        {
+          "value": "slow",
+          "label": "Slow or laggy"
+        },
+        {
+          "value": "app_crashes",
+          "label": "Apps crash or freeze"
+        },
+        {
+          "value": "screen",
+          "label": "Screen cracked, flickering, lines or blank"
+        },
+        {
+          "value": "touch",
+          "label": "Touch doesn't respond correctly"
+        },
+        {
+          "value": "camera",
+          "label": "Camera problems"
+        },
+        {
+          "value": "audio",
+          "label": "Speaker or microphone problems"
+        },
+        {
+          "value": "network",
+          "label": "Calls, mobile data or Wi-Fi problems"
+        },
+        {
+          "value": "storage_full",
+          "label": "\"Storage full\" warnings"
+        },
+        {
+          "value": "none",
+          "label": "No specific problem (general check-up)",
+          "exclusive": true
+        }
+      ]
+    },
+    {
+      "id": "physical_event",
+      "text": "Has the phone been dropped or exposed to liquid recently?",
+      "type": "single_choice",
+      "priority": 90,
+      "targets": [
+        "display_damage",
+        "liquid_damage",
+        "camera_fault",
+        "audio_fault",
+        "charging_path"
+      ],
+      "options": [
+        {
+          "value": "none",
+          "label": "No"
+        },
+        {
+          "value": "dropped",
+          "label": "Dropped / impact"
+        },
+        {
+          "value": "liquid",
+          "label": "Liquid exposure (water, drink, rain...)"
+        },
+        {
+          "value": "both",
+          "label": "Both"
+        },
+        {
+          "value": "unsure",
+          "label": "Not sure"
+        }
+      ]
+    },
+    {
+      "id": "battery_swelling",
+      "text": "Is the back cover or screen lifting, bulging, or separating at the edges?",
+      "help": "A swollen battery can push the screen or back panel outward. This is a safety risk.",
+      "type": "single_choice",
+      "priority": 70,
+      "targets": [
+        "battery_wear",
+        "display_damage"
+      ],
+      "visible_if": {
+        "any": [
+          [
+            "ans.primary_symptoms",
+            "contains_any",
+            [
+              "battery_drain",
+              "shutdowns",
+              "overheating",
+              "screen",
+              "not_charging"
+            ]
+          ],
+          [
+            "obs.battery.status.health",
+            "in",
+            [
+              "dead",
+              "overheat",
+              "over_voltage",
+              "unspecified_failure"
+            ]
+          ]
+        ]
+      },
+      "options": [
+        {
+          "value": "yes",
+          "label": "Yes"
+        },
+        {
+          "value": "no",
+          "label": "No"
+        },
+        {
+          "value": "unsure",
+          "label": "Not sure"
+        }
+      ]
+    },
+    {
+      "id": "battery_drain_pattern",
+      "text": "How would you describe the battery drain?",
+      "type": "single_choice",
+      "priority": 60,
+      "targets": [
+        "battery_wear",
+        "software_instability"
+      ],
+      "visible_if": [
+        "ans.primary_symptoms",
+        "contains_any",
+        [
+          "battery_drain",
+          "shutdowns"
+        ]
+      ],
+      "options": [
+        {
+          "value": "fast_always",
+          "label": "Much faster than it used to, even when idle"
+        },
+        {
+          "value": "fast_heavy_use",
+          "label": "Only during heavy use (games, navigation, camera)"
+        },
+        {
+          "value": "sudden_drops",
+          "label": "The percentage drops suddenly (e.g. 30% to 5%)"
+        },
+        {
+          "value": "unsure",
+          "label": "Not sure"
+        }
+      ]
+    },
+    {
+      "id": "shutdown_at_charge",
+      "text": "When the phone turns off by itself, how much charge does it show?",
+      "type": "single_choice",
+      "priority": 60,
+      "targets": [
+        "battery_wear",
+        "software_instability"
+      ],
+      "visible_if": [
+        "ans.primary_symptoms",
+        "contains",
+        "shutdowns"
+      ],
+      "options": [
+        {
+          "value": "yes_above_20",
+          "label": "It still shows 20% or more"
+        },
+        {
+          "value": "only_when_low",
+          "label": "Only when the battery is nearly empty"
+        },
+        {
+          "value": "only_when_cold",
+          "label": "Mostly in cold weather"
+        },
+        {
+          "value": "random_restart",
+          "label": "It restarts (reboots) rather than switching off"
+        },
+        {
+          "value": "unsure",
+          "label": "Not sure"
+        }
+      ]
+    },
+    {
+      "id": "battery_history",
+      "text": "Has the battery ever been replaced?",
+      "type": "single_choice",
+      "priority": 40,
+      "targets": [
+        "battery_wear"
+      ],
+      "visible_if": [
+        "ans.primary_symptoms",
+        "contains_any",
+        [
+          "battery_drain",
+          "shutdowns",
+          "not_charging",
+          "overheating"
+        ]
+      ],
+      "options": [
+        {
+          "value": "original",
+          "label": "No, it's the original battery"
+        },
+        {
+          "value": "replaced_recent",
+          "label": "Yes, within the last year"
+        },
+        {
+          "value": "replaced_old",
+          "label": "Yes, more than a year ago"
+        },
+        {
+          "value": "unsure",
+          "label": "Not sure"
+        }
+      ]
+    },
+    {
+      "id": "charging_behavior",
+      "text": "What happens when you plug in a charger?",
+      "type": "single_choice",
+      "priority": 70,
+      "targets": [
+        "charging_path",
+        "battery_wear"
+      ],
+      "visible_if": [
+        "ans.primary_symptoms",
+        "contains",
+        "not_charging"
+      ],
+      "options": [
+        {
+          "value": "no_response",
+          "label": "Nothing - no charging indicator"
+        },
+        {
+          "value": "intermittent",
+          "label": "Charges only if the cable is held at an angle, or keeps connecting/disconnecting"
+        },
+        {
+          "value": "slow",
+          "label": "Charges, but much more slowly than before"
+        },
+        {
+          "value": "stops_partway",
+          "label": "Starts charging then stops"
+        },
+        {
+          "value": "unsure",
+          "label": "Not sure"
+        }
+      ]
+    },
+    {
+      "id": "charging_other_cable",
+      "text": "Have you tried a different cable and charger that work with another phone?",
+      "type": "single_choice",
+      "priority": 65,
+      "targets": [
+        "charging_path"
+      ],
+      "visible_if": [
+        "ans.primary_symptoms",
+        "contains",
+        "not_charging"
+      ],
+      "options": [
+        {
+          "value": "same_problem",
+          "label": "Yes - same problem"
+        },
+        {
+          "value": "works_fine",
+          "label": "Yes - the other cable/charger works"
+        },
+        {
+          "value": "not_tried",
+          "label": "Not tried"
+        }
+      ]
+    },
+    {
+      "id": "wireless_charging",
+      "text": "Does wireless charging work?",
+      "type": "single_choice",
+      "priority": 45,
+      "targets": [
+        "charging_path",
+        "battery_wear"
+      ],
+      "visible_if": {
+        "all": [
+          [
+            "ans.primary_symptoms",
+            "contains",
+            "not_charging"
+          ],
+          [
+            "ans.charging_behavior",
+            "in",
+            [
+              "no_response",
+              "intermittent",
+              "stops_partway"
+            ]
+          ]
+        ]
+      },
+      "options": [
+        {
+          "value": "works",
+          "label": "Yes, wireless charging works"
+        },
+        {
+          "value": "doesnt_work",
+          "label": "No, it doesn't work either"
+        },
+        {
+          "value": "not_available",
+          "label": "Not supported / not tried"
+        }
+      ]
+    },
+    {
+      "id": "port_debris",
+      "text": "Shine a light into the charging port. Do you see lint, debris, corrosion or bent pins?",
+      "type": "single_choice",
+      "priority": 40,
+      "targets": [
+        "charging_path",
+        "liquid_damage"
+      ],
+      "visible_if": [
+        "ans.primary_symptoms",
+        "contains",
+        "not_charging"
+      ],
+      "options": [
+        {
+          "value": "debris",
+          "label": "Lint or debris"
+        },
+        {
+          "value": "corrosion",
+          "label": "Green/white residue or corrosion"
+        },
+        {
+          "value": "damage",
+          "label": "Bent or loose parts"
+        },
+        {
+          "value": "clean",
+          "label": "Looks clean"
+        },
+        {
+          "value": "unsure",
+          "label": "Can't tell"
+        }
+      ],
+      "answered_by_tests": [
+        "test.charging_connector.outcome",
+        "eq",
+        "pass"
+      ],
+      "answered_by_tests_reason": "the charging connector test stayed connected"
+    },
+    {
+      "id": "overheat_context",
+      "text": "When does the phone get hot?",
+      "type": "single_choice",
+      "priority": 55,
+      "targets": [
+        "battery_wear",
+        "software_instability",
+        "charging_path"
+      ],
+      "visible_if": {
+        "any": [
+          [
+            "ans.primary_symptoms",
+            "contains",
+            "overheating"
+          ],
+          [
+            "obs.battery.status.temperature_c",
+            "gte",
+            42
+          ]
+        ]
+      },
+      "options": [
+        {
+          "value": "charging",
+          "label": "Mainly while charging"
+        },
+        {
+          "value": "heavy_use",
+          "label": "During heavy use (games, video, navigation)"
+        },
+        {
+          "value": "idle",
+          "label": "Even when idle or in a pocket"
+        },
+        {
+          "value": "unsure",
+          "label": "Not sure"
+        }
+      ]
+    },
+    {
+      "id": "screen_symptom",
+      "text": "What do you see on the screen?",
+      "type": "multi_choice",
+      "priority": 70,
+      "targets": [
+        "display_damage",
+        "software_instability"
+      ],
+      "visible_if": {
+        "any": [
+          [
+            "ans.primary_symptoms",
+            "contains_any",
+            [
+              "screen",
+              "touch"
+            ]
+          ],
+          [
+            "ans.physical_event",
+            "in",
+            [
+              "dropped",
+              "both"
+            ]
+          ]
+        ]
+      },
+      "options": [
+        {
+          "value": "cracked_glass",
+          "label": "Cracked or chipped glass"
+        },
+        {
+          "value": "lines_or_spots",
+          "label": "Lines, spots, ink blots or discoloured areas"
+        },
+        {
+          "value": "flicker",
+          "label": "Flickering or brightness jumps"
+        },
+        {
+          "value": "black_screen",
+          "label": "Screen stays black but the phone rings/vibrates"
+        },
+        {
+          "value": "none",
+          "label": "None of these",
+          "exclusive": true
+        }
+      ]
+    },
+    {
+      "id": "touch_symptom",
+      "text": "How does touch behave?",
+      "type": "single_choice",
+      "priority": 65,
+      "targets": [
+        "display_damage",
+        "software_instability"
+      ],
+      "visible_if": {
+        "any": [
+          [
+            "ans.primary_symptoms",
+            "contains",
+            "touch"
+          ],
+          [
+            "ans.screen_symptom",
+            "contains_any",
+            [
+              "cracked_glass",
+              "lines_or_spots"
+            ]
+          ],
+          [
+            "obs.input.touchscreen.touchscreen_registered",
+            "eq",
+            false
+          ]
+        ]
+      },
+      "options": [
+        {
+          "value": "dead_areas",
+          "label": "Parts of the screen don't respond"
+        },
+        {
+          "value": "ghost_touches",
+          "label": "It registers touches by itself"
+        },
+        {
+          "value": "unresponsive",
+          "label": "Touch doesn't work at all"
+        },
+        {
+          "value": "works_fine",
+          "label": "Touch works normally"
+        }
+      ],
+      "answered_by_tests": {
+        "all": [
+          [
+            "test.touch_grid.outcome",
+            "eq",
+            "pass"
+          ],
+          [
+            "test.touch_grid.coverage_pct",
+            "gte",
+            100
+          ]
+        ]
+      },
+      "answered_by_tests_reason": "the touchscreen test registered every square"
+    },
+    {
+      "id": "touch_after_restart",
+      "text": "Does the touch problem go away after restarting the phone?",
+      "type": "single_choice",
+      "priority": 50,
+      "targets": [
+        "display_damage",
+        "software_instability"
+      ],
+      "visible_if": [
+        "ans.touch_symptom",
+        "in",
+        [
+          "dead_areas",
+          "ghost_touches",
+          "unresponsive"
+        ]
+      ],
+      "options": [
+        {
+          "value": "goes_away",
+          "label": "Yes, at least for a while"
+        },
+        {
+          "value": "persists",
+          "label": "No, it stays the same"
+        },
+        {
+          "value": "not_tried",
+          "label": "Not tried"
+        }
+      ],
+      "answered_by_tests": {
+        "all": [
+          [
+            "test.touch_grid.outcome",
+            "eq",
+            "pass"
+          ],
+          [
+            "test.touch_grid.coverage_pct",
+            "gte",
+            100
+          ]
+        ]
+      },
+      "answered_by_tests_reason": "the touchscreen test registered every square"
+    },
+    {
+      "id": "crash_scope",
+      "text": "Which apps are affected by crashes or freezing?",
+      "type": "single_choice",
+      "priority": 60,
+      "targets": [
+        "software_instability",
+        "storage_pressure"
+      ],
+      "visible_if": {
+        "any": [
+          [
+            "ans.primary_symptoms",
+            "contains_any",
+            [
+              "app_crashes",
+              "slow"
+            ]
+          ],
+          [
+            "derived.app_instability_7d",
+            "gte",
+            10
+          ]
+        ]
+      },
+      "options": [
+        {
+          "value": "one_app",
+          "label": "One or two specific apps"
+        },
+        {
+          "value": "many_apps",
+          "label": "Many different apps"
+        },
+        {
+          "value": "system",
+          "label": "The whole phone freezes or the home screen restarts"
+        },
+        {
+          "value": "unsure",
+          "label": "Not sure"
+        }
+      ]
+    },
+    {
+      "id": "recent_update",
+      "text": "Did the problems start after a system or app update?",
+      "type": "single_choice",
+      "priority": 45,
+      "targets": [
+        "software_instability",
+        "battery_wear",
+        "connectivity_issue"
+      ],
+      "visible_if": [
+        "ans.primary_symptoms",
+        "contains_any",
+        [
+          "app_crashes",
+          "slow",
+          "battery_drain",
+          "shutdowns",
+          "network",
+          "overheating"
+        ]
+      ],
+      "options": [
+        {
+          "value": "yes",
+          "label": "Yes"
+        },
+        {
+          "value": "no",
+          "label": "No"
+        },
+        {
+          "value": "unsure",
+          "label": "Not sure"
+        }
+      ]
+    },
+    {
+      "id": "safe_mode",
+      "text": "Does the problem continue in Safe Mode?",
+      "help": "On most Android phones: hold the power button, then press and hold 'Power off' until 'Safe mode' appears. Third-party apps are disabled in Safe Mode. Restart normally to exit.",
+      "type": "single_choice",
+      "priority": 55,
+      "targets": [
+        "software_instability",
+        "battery_wear",
+        "display_damage"
+      ],
+      "visible_if": [
+        "ans.primary_symptoms",
+        "contains_any",
+        [
+          "app_crashes",
+          "slow",
+          "battery_drain",
+          "shutdowns",
+          "overheating",
+          "touch"
+        ]
+      ],
+      "options": [
+        {
+          "value": "stops",
+          "label": "No - the problem goes away in Safe Mode"
+        },
+        {
+          "value": "continues",
+          "label": "Yes - the problem continues"
+        },
+        {
+          "value": "not_tried",
+          "label": "Not tried"
+        }
+      ]
+    },
+    {
+      "id": "storage_warning",
+      "text": "Do you regularly see 'storage full' warnings or have trouble installing updates?",
+      "type": "single_choice",
+      "priority": 35,
+      "targets": [
+        "storage_pressure"
+      ],
+      "visible_if": {
+        "all": [
+          [
+            "ans.primary_symptoms",
+            "contains_any",
+            [
+              "slow",
+              "app_crashes",
+              "storage_full"
+            ]
+          ],
+          [
+            "obs_status.storage.data",
+            "ne",
+            "ok"
+          ]
+        ]
+      },
+      "options": [
+        {
+          "value": "yes",
+          "label": "Yes"
+        },
+        {
+          "value": "no",
+          "label": "No"
+        }
+      ]
+    },
+    {
+      "id": "camera_symptom",
+      "text": "What happens with the camera?",
+      "type": "single_choice",
+      "priority": 65,
+      "targets": [
+        "camera_fault",
+        "software_instability"
+      ],
+      "visible_if": [
+        "ans.primary_symptoms",
+        "contains",
+        "camera"
+      ],
+      "options": [
+        {
+          "value": "wont_open",
+          "label": "The camera app won't open or shows 'camera failed'"
+        },
+        {
+          "value": "black_image",
+          "label": "The preview is black"
+        },
+        {
+          "value": "blurry",
+          "label": "Photos are blurry or it can't focus"
+        },
+        {
+          "value": "cracked_lens",
+          "label": "The lens cover is cracked"
+        },
+        {
+          "value": "one_lens",
+          "label": "One lens or mode fails, others work"
+        }
+      ],
+      "answered_by_tests": {
+        "all": [
+          [
+            "test.camera_rear.outcome",
+            "eq",
+            "pass"
+          ],
+          [
+            "test.camera_front.outcome",
+            "eq",
+            "pass"
+          ]
+        ]
+      },
+      "answered_by_tests_reason": "both camera tests passed"
+    },
+    {
+      "id": "camera_other_app",
+      "text": "Does the camera work in another app (e.g. a video-call app)?",
+      "type": "single_choice",
+      "priority": 45,
+      "targets": [
+        "camera_fault",
+        "software_instability"
+      ],
+      "visible_if": [
+        "ans.camera_symptom",
+        "in",
+        [
+          "wont_open",
+          "black_image"
+        ]
+      ],
+      "options": [
+        {
+          "value": "works",
+          "label": "Yes, it works there"
+        },
+        {
+          "value": "fails",
+          "label": "No, it fails there too"
+        },
+        {
+          "value": "not_tried",
+          "label": "Not tried"
+        }
+      ],
+      "answered_by_tests": {
+        "all": [
+          [
+            "test.camera_rear.outcome",
+            "eq",
+            "pass"
+          ],
+          [
+            "test.camera_front.outcome",
+            "eq",
+            "pass"
+          ]
+        ]
+      },
+      "answered_by_tests_reason": "both camera tests passed"
+    },
+    {
+      "id": "audio_symptom",
+      "text": "Which audio problem do you have?",
+      "type": "single_choice",
+      "priority": 65,
+      "targets": [
+        "audio_fault",
+        "connectivity_issue"
+      ],
+      "visible_if": [
+        "ans.primary_symptoms",
+        "contains",
+        "audio"
+      ],
+      "options": [
+        {
+          "value": "no_speaker",
+          "label": "No sound from the loudspeaker"
+        },
+        {
+          "value": "no_earpiece",
+          "label": "Can't hear callers (earpiece)"
+        },
+        {
+          "value": "mic",
+          "label": "Other people can't hear me"
+        },
+        {
+          "value": "distorted",
+          "label": "Sound is crackly or distorted"
+        },
+        {
+          "value": "bluetooth_only",
+          "label": "Only Bluetooth audio has problems"
+        }
+      ],
+      "answered_by_tests": {
+        "all": [
+          [
+            "test.speaker.outcome",
+            "eq",
+            "pass"
+          ],
+          [
+            "test.microphone.outcome",
+            "eq",
+            "pass"
+          ],
+          [
+            "test.earpiece_call.outcome",
+            "eq",
+            "pass"
+          ]
+        ]
+      },
+      "answered_by_tests_reason": "the speaker, microphone and earpiece tests passed"
+    },
+    {
+      "id": "audio_headphones",
+      "text": "Does sound work through headphones (wired or Bluetooth)?",
+      "type": "single_choice",
+      "priority": 50,
+      "targets": [
+        "audio_fault",
+        "software_instability"
+      ],
+      "visible_if": [
+        "ans.audio_symptom",
+        "in",
+        [
+          "no_speaker",
+          "no_earpiece",
+          "distorted"
+        ]
+      ],
+      "options": [
+        {
+          "value": "works",
+          "label": "Yes, headphones work"
+        },
+        {
+          "value": "doesnt_work",
+          "label": "No, there's no sound there either"
+        },
+        {
+          "value": "not_tried",
+          "label": "Not tried"
+        }
+      ],
+      "answered_by_tests": [
+        "test.speaker.outcome",
+        "eq",
+        "pass"
+      ],
+      "answered_by_tests_reason": "the speaker test passed"
+    },
+    {
+      "id": "network_symptom",
+      "text": "Which connectivity problem do you have?",
+      "type": "single_choice",
+      "priority": 65,
+      "targets": [
+        "connectivity_issue",
+        "software_instability"
+      ],
+      "visible_if": [
+        "ans.primary_symptoms",
+        "contains",
+        "network"
+      ],
+      "options": [
+        {
+          "value": "no_service",
+          "label": "No mobile signal / 'No service'"
+        },
+        {
+          "value": "no_sim",
+          "label": "SIM card not detected"
+        },
+        {
+          "value": "mobile_data",
+          "label": "Signal is fine but mobile data doesn't work"
+        },
+        {
+          "value": "wifi",
+          "label": "Wi-Fi won't connect or keeps dropping"
+        },
+        {
+          "value": "calls_drop",
+          "label": "Calls drop or have poor quality"
+        }
+      ]
+    },
+    {
+      "id": "network_scope",
+      "text": "Does the problem happen everywhere, and do other phones work in the same place?",
+      "type": "single_choice",
+      "priority": 50,
+      "targets": [
+        "connectivity_issue"
+      ],
+      "visible_if": [
+        "ans.network_symptom",
+        "in",
+        [
+          "no_service",
+          "mobile_data",
+          "wifi",
+          "calls_drop"
+        ]
+      ],
+      "options": [
+        {
+          "value": "everywhere",
+          "label": "Everywhere, while other phones work fine"
+        },
+        {
+          "value": "some_places",
+          "label": "Only in some places, or other phones struggle too"
+        },
+        {
+          "value": "unsure",
+          "label": "Not sure"
+        }
+      ]
+    },
+    {
+      "id": "liquid_timing",
+      "text": "When was the phone exposed to liquid?",
+      "type": "single_choice",
+      "priority": 75,
+      "targets": [
+        "liquid_damage"
+      ],
+      "visible_if": [
+        "ans.physical_event",
+        "in",
+        [
+          "liquid",
+          "both"
+        ]
+      ],
+      "options": [
+        {
+          "value": "within_48h",
+          "label": "Within the last 48 hours"
+        },
+        {
+          "value": "days_ago",
+          "label": "A few days to two weeks ago"
+        },
+        {
+          "value": "weeks_ago",
+          "label": "More than two weeks ago"
+        }
+      ]
+    }
+  ]
+}

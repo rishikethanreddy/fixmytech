@@ -1,0 +1,2695 @@
+{
+  "version": "2026.10.1",
+  "weight_scale": {
+    "strong": 3.0,
+    "moderate": 2.0,
+    "weak": 1.0,
+    "note": "Weights are additive ranking points, not probabilities. Within one fault, rules that share a 'group' read the same underlying evidence, so only the strongest supporting and strongest contradicting rule in each group count."
+  },
+  "rules": [
+    {
+      "id": "BATT-HEALTH-FLAG",
+      "group": "battery_health_flag",
+      "when": [
+        "obs.battery.status.health",
+        "in",
+        [
+          "dead",
+          "unspecified_failure",
+          "over_voltage"
+        ]
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 3.0
+        }
+      ],
+      "rationale": "The battery fuel gauge reports a fault condition.",
+      "limitations": [
+        "Reported by the battery management system; a technician should confirm with a load test."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "BATT-HEALTH-OVERHEAT",
+      "group": "battery_temperature",
+      "when": [
+        "obs.battery.status.health",
+        "eq",
+        "overheat"
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 2.0
+        }
+      ],
+      "rationale": "The battery management system reports an overheat condition.",
+      "limitations": [
+        "Can also be caused by a hot environment or heavy use during the scan."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "BATT-TEMP-HIGH",
+      "group": "battery_temperature",
+      "when": [
+        "obs.battery.status.temperature_c",
+        "gte",
+        45
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 1.5
+        },
+        {
+          "fault": "software_instability",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "Battery temperature at or above 45 C while connected to a computer is unusually high.",
+      "limitations": [
+        "Single point-in-time reading; charging and heavy use raise temperature normally."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "BATT-CAPACITY-LOW",
+      "group": "battery_capacity",
+      "when": [
+        "obs.battery.capacity.capacity_ratio_pct",
+        "lt",
+        80
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 3.0
+        }
+      ],
+      "rationale": "The fuel gauge estimates the battery holds less than 80% of its design capacity, a common replacement threshold.",
+      "limitations": [
+        "Fuel-gauge estimate, not a lab measurement."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "BATT-CAPACITY-FAIR",
+      "group": "battery_capacity",
+      "when": {
+        "all": [
+          [
+            "obs.battery.capacity.capacity_ratio_pct",
+            "gte",
+            80
+          ],
+          [
+            "obs.battery.capacity.capacity_ratio_pct",
+            "lt",
+            87
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "Estimated capacity is 80-87% of design: noticeable wear, but usually not yet the cause of severe problems.",
+      "limitations": [
+        "Fuel-gauge estimate, not a lab measurement."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "BATT-CAPACITY-GOOD",
+      "group": "battery_capacity",
+      "when": [
+        "obs.battery.capacity.capacity_ratio_pct",
+        "gte",
+        92
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": -2.0
+        }
+      ],
+      "rationale": "Estimated capacity is at least 92% of design, which argues against a worn battery.",
+      "limitations": [
+        "Does not rule out a battery that cannot deliver peak current."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "BATT-CYCLES-HIGH",
+      "group": "battery_cycles",
+      "when": [
+        "obs.battery.capacity.cycle_count",
+        "gte",
+        800
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 1.5
+        }
+      ],
+      "rationale": "800+ charge cycles is beyond the rated life of most phone batteries.",
+      "limitations": [
+        "Cycle counting methods differ between manufacturers."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "BATT-CYCLES-MED",
+      "group": "battery_cycles",
+      "when": {
+        "all": [
+          [
+            "obs.battery.capacity.cycle_count",
+            "gte",
+            500
+          ],
+          [
+            "obs.battery.capacity.cycle_count",
+            "lt",
+            800
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "500-800 cycles: many batteries are approaching the end of rated life.",
+      "limitations": [
+        "Cycle counting methods differ between manufacturers."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "BATT-DEVICE-AGE-OLD",
+      "group": "battery_age",
+      "when": {
+        "all": [
+          [
+            "device.age_months",
+            "gte",
+            30
+          ],
+          [
+            "ans.battery_history",
+            "in",
+            [
+              "original",
+              "unsure",
+              "replaced_old"
+            ]
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "Lithium-ion batteries in phones older than about 2.5 years have usually lost meaningful capacity.",
+      "limitations": [
+        "Based on typical ageing, not on this battery."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "BATT-RECENTLY-REPLACED",
+      "group": "battery_age",
+      "when": [
+        "ans.battery_history",
+        "eq",
+        "replaced_recent"
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": -1.5
+        }
+      ],
+      "rationale": "A battery replaced within the last year is less likely to be worn (unless it was a low-quality part).",
+      "limitations": [
+        "Low-quality replacement batteries can fail early."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "BATT-DRAIN-SUDDEN",
+      "group": "battery_drain_report",
+      "when": [
+        "ans.battery_drain_pattern",
+        "eq",
+        "sudden_drops"
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 2.5
+        }
+      ],
+      "rationale": "Sudden percentage drops are a classic sign of a worn battery whose voltage sags under load.",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "BATT-DRAIN-ALWAYS",
+      "group": "battery_drain_report",
+      "when": [
+        "ans.battery_drain_pattern",
+        "eq",
+        "fast_always"
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 1.5
+        },
+        {
+          "fault": "software_instability",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "Fast drain even when idle points to either reduced capacity or a background process keeping the phone awake.",
+      "limitations": [
+        "Customer-reported; Safe Mode helps separate the two causes."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "BATT-DRAIN-HEAVY-ONLY",
+      "group": "battery_drain_report",
+      "when": [
+        "ans.battery_drain_pattern",
+        "eq",
+        "fast_heavy_use"
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "Fast drain only during heavy use is largely expected behaviour.",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "BATT-SHUTDOWN-WITH-CHARGE",
+      "group": "battery_shutdown_report",
+      "when": [
+        "ans.shutdown_at_charge",
+        "eq",
+        "yes_above_20"
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 2.5
+        }
+      ],
+      "rationale": "Switching off with charge remaining usually means the battery cannot sustain voltage under load.",
+      "limitations": [
+        "Customer-reported; a faulty power-management chip can cause the same symptom."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "BATT-SHUTDOWN-COLD",
+      "group": "battery_shutdown_report",
+      "when": [
+        "ans.shutdown_at_charge",
+        "eq",
+        "only_when_cold"
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 1.5
+        }
+      ],
+      "rationale": "Aged batteries lose much of their output in the cold.",
+      "limitations": [
+        "Even healthy batteries can shut down in very cold conditions."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "BOOT-RANDOM-RESTART",
+      "group": "restart_report",
+      "when": [
+        "ans.shutdown_at_charge",
+        "eq",
+        "random_restart"
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 1.5
+        },
+        {
+          "fault": "battery_wear",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "Spontaneous reboots are most often caused by system crashes, sometimes by power delivery problems.",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "BATT-SWELLING",
+      "group": "battery_swelling",
+      "when": [
+        "ans.battery_swelling",
+        "eq",
+        "yes"
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 4.0
+        },
+        {
+          "fault": "display_damage",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "A lifting screen or back cover is most commonly caused by a swelling battery.",
+      "limitations": [
+        "Customer-reported; a technician must confirm."
+      ],
+      "requires_confirmation": true,
+      "notes": [
+        {
+          "severity": "safety",
+          "text": "A swelling battery can catch fire. Stop charging the phone, do not press on it, and have it inspected as soon as possible."
+        }
+      ]
+    },
+    {
+      "id": "BOOT-POWER-FAULT",
+      "group": "boot_reason",
+      "when": [
+        "obs.stability.boot.last_boot_reason_class",
+        "eq",
+        "power_fault"
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 2.0
+        }
+      ],
+      "rationale": "The OS recorded that the last restart was caused by a power fault (e.g. under-voltage).",
+      "limitations": [
+        "Boot reasons are vendor-specific and occasionally mislabelled."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "BOOT-CRASH",
+      "group": "boot_reason",
+      "when": [
+        "obs.stability.boot.last_boot_reason_class",
+        "eq",
+        "crash_or_watchdog"
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 1.5
+        }
+      ],
+      "rationale": "The OS recorded that the last restart was caused by a kernel crash or watchdog reset.",
+      "limitations": [
+        "Kernel crashes can also have hardware causes (e.g. memory or power faults)."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "BOOT-THERMAL",
+      "group": "boot_reason",
+      "when": [
+        "obs.stability.boot.last_boot_reason_class",
+        "eq",
+        "thermal_shutdown"
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 1.0
+        },
+        {
+          "fault": "software_instability",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "The OS recorded a thermal shutdown.",
+      "limitations": [
+        "Heavy use in a hot environment can cause this on a healthy phone."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "BOOT-ABNORMAL-HISTORY",
+      "group": "boot_history",
+      "when": [
+        "obs.stability.boot.abnormal_restarts_recent",
+        "gte",
+        2
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 1.0
+        },
+        {
+          "fault": "battery_wear",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "Several abnormal restarts were recorded in the last 7 days.",
+      "limitations": [
+        "Restart history is not recorded on many devices."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "SW-SYSTEM-CRASHES",
+      "group": "system_crash_log",
+      "when": {
+        "any": [
+          [
+            "obs.stability.crashes.system_server_crashes",
+            "gte",
+            1
+          ],
+          [
+            "obs.stability.crashes.system_app_crashes",
+            "gte",
+            3
+          ],
+          [
+            "obs.stability.crashes.kernel_panics",
+            "gte",
+            1
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 2.5
+        }
+      ],
+      "rationale": "The OS logged crashes of core system components in the last 7 days.",
+      "limitations": [
+        "System crashes can occasionally be triggered by failing hardware."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "SW-APP-CRASHES-HIGH",
+      "group": "app_crash_log",
+      "when": [
+        "derived.app_instability_7d",
+        "gte",
+        15
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 2.0
+        }
+      ],
+      "rationale": "15 or more app crashes/freezes were logged in the last 7 days.",
+      "limitations": [
+        "One misbehaving app can produce many entries."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "SW-APP-CRASHES-SOME",
+      "group": "app_crash_log",
+      "when": {
+        "all": [
+          [
+            "derived.app_instability_7d",
+            "gte",
+            5
+          ],
+          [
+            "derived.app_instability_7d",
+            "lt",
+            15
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "Several app crashes/freezes were logged in the last 7 days.",
+      "limitations": [
+        "Occasional crashes are normal on most phones."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "SW-NO-CRASHES-BUT-REPORTED",
+      "group": "app_crash_log",
+      "when": {
+        "all": [
+          [
+            "derived.app_instability_7d",
+            "eq",
+            0
+          ],
+          [
+            "obs.stability.crashes.system_app_crashes",
+            "eq",
+            0
+          ],
+          [
+            "obs.stability.crashes.history_days_available",
+            "gte",
+            5
+          ],
+          [
+            "ans.primary_symptoms",
+            "contains",
+            "app_crashes"
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": -1.0
+        }
+      ],
+      "rationale": "The customer reports crashes, but the OS logged none in the available history. This is conflicting evidence.",
+      "limitations": [
+        "Some freezes are not logged as crashes; the history may have been cleared by a restart or reset."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "SW-CRASH-SCOPE-SYSTEM",
+      "group": "crash_scope_report",
+      "when": [
+        "ans.crash_scope",
+        "eq",
+        "system"
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 2.0
+        }
+      ],
+      "rationale": "Whole-phone freezes and launcher restarts point to system-level instability.",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "SW-CRASH-SCOPE-MANY",
+      "group": "crash_scope_report",
+      "when": [
+        "ans.crash_scope",
+        "eq",
+        "many_apps"
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 1.5
+        },
+        {
+          "fault": "storage_pressure",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "Many different apps crashing suggests a system-wide software or storage problem.",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "SW-CRASH-SCOPE-ONE",
+      "group": "crash_scope_report",
+      "when": [
+        "ans.crash_scope",
+        "eq",
+        "one_app"
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "Crashes limited to one or two apps are usually an app problem, fixable by updating or reinstalling it.",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": false,
+      "notes": [
+        {
+          "severity": "info",
+          "text": "Crashes limited to one or two apps are usually fixed by updating, clearing data for, or reinstalling those apps."
+        }
+      ]
+    },
+    {
+      "id": "SW-AFTER-UPDATE",
+      "group": "recent_update_report",
+      "when": [
+        "ans.recent_update",
+        "eq",
+        "yes"
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 1.5
+        }
+      ],
+      "rationale": "Problems that start right after an update are frequently software-related.",
+      "limitations": [
+        "Timing can be coincidental."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "SW-SAFE-MODE-STOPS",
+      "group": "safe_mode_report",
+      "when": [
+        "ans.safe_mode",
+        "eq",
+        "stops"
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 2.5
+        },
+        {
+          "fault": "battery_wear",
+          "weight": -1.0
+        },
+        {
+          "fault": "display_damage",
+          "weight": -1.0
+        }
+      ],
+      "rationale": "If the problem disappears in Safe Mode, a third-party app is the likely cause.",
+      "limitations": [
+        "Customer-reported; intermittent problems can disappear by chance."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "SW-SAFE-MODE-CONTINUES",
+      "group": "safe_mode_report",
+      "when": [
+        "ans.safe_mode",
+        "eq",
+        "continues"
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": -1.0
+        }
+      ],
+      "rationale": "A problem that persists in Safe Mode is less likely to be caused by a third-party app.",
+      "limitations": [
+        "System software can still be at fault."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "SW-SYMPTOM-REPORTED",
+      "group": "primary_software",
+      "when": [
+        "ans.primary_symptoms",
+        "contains_any",
+        [
+          "app_crashes",
+          "slow"
+        ]
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "The customer reports crashes or slowness.",
+      "limitations": [
+        "Customer-reported symptom area only."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "SW-OVERHEAT-IDLE",
+      "group": "overheat_report",
+      "when": [
+        "ans.overheat_context",
+        "eq",
+        "idle"
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 1.5
+        },
+        {
+          "fault": "battery_wear",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "Heat while idle usually means a runaway background process, or less often a battery fault.",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "CHG-OVERHEAT-CHARGING",
+      "group": "overheat_report",
+      "when": [
+        "ans.overheat_context",
+        "eq",
+        "charging"
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 1.0
+        },
+        {
+          "fault": "charging_path",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "Excess heat while charging can come from a worn battery or a poor connection in the charging path.",
+      "limitations": [
+        "Fast charging makes phones noticeably warm by design."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "THERMAL-THROTTLING",
+      "group": "thermal_obs",
+      "when": [
+        "obs.thermal.status.throttling_code",
+        "gte",
+        3
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 1.0
+        },
+        {
+          "fault": "battery_wear",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "The OS reported severe thermal throttling during the scan, while the phone should be nearly idle.",
+      "limitations": [
+        "Point-in-time reading; charging from the computer adds heat."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "STOR-CRITICAL",
+      "group": "storage_obs",
+      "when": [
+        "obs.storage.data.free_pct",
+        "lt",
+        5
+      ],
+      "effects": [
+        {
+          "fault": "storage_pressure",
+          "weight": 3.5
+        },
+        {
+          "fault": "software_instability",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "Less than 5% free storage severely degrades Android performance and prevents updates.",
+      "limitations": [],
+      "requires_confirmation": false
+    },
+    {
+      "id": "STOR-LOW",
+      "group": "storage_obs",
+      "when": {
+        "all": [
+          [
+            "obs.storage.data.free_pct",
+            "gte",
+            5
+          ],
+          [
+            "obs.storage.data.free_pct",
+            "lt",
+            10
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "storage_pressure",
+          "weight": 2.0
+        }
+      ],
+      "rationale": "Less than 10% free storage can slow the phone and cause app failures.",
+      "limitations": [],
+      "requires_confirmation": false
+    },
+    {
+      "id": "STOR-AMPLE",
+      "group": "storage_obs",
+      "when": [
+        "obs.storage.data.free_pct",
+        "gte",
+        20
+      ],
+      "effects": [
+        {
+          "fault": "storage_pressure",
+          "weight": -2.5
+        }
+      ],
+      "rationale": "At least 20% of storage is free, so storage pressure is unlikely.",
+      "limitations": [],
+      "requires_confirmation": false
+    },
+    {
+      "id": "STOR-WARNING-SEEN",
+      "group": "storage_report",
+      "when": [
+        "ans.storage_warning",
+        "eq",
+        "yes"
+      ],
+      "effects": [
+        {
+          "fault": "storage_pressure",
+          "weight": 3.0
+        }
+      ],
+      "rationale": "The customer regularly sees the phone's own 'storage full' warnings or update failures, which the OS shows only when free space is critically low.",
+      "limitations": [
+        "Customer-reported; confirm free space in Settings > Storage."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "STOR-SYMPTOM-REPORTED",
+      "group": "primary_storage",
+      "when": [
+        "ans.primary_symptoms",
+        "contains",
+        "storage_full"
+      ],
+      "effects": [
+        {
+          "fault": "storage_pressure",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "The customer reports storage warnings as a main problem.",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "MEM-LOW",
+      "group": "memory_obs",
+      "when": [
+        "obs.memory.ram.available_pct",
+        "lt",
+        8
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "Very little RAM was available at scan time.",
+      "limitations": [
+        "Android keeps RAM full by design; this is weak evidence on its own."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "CHG-CONNECTED-NOT-CHARGING",
+      "group": "charging_obs",
+      "when": [
+        "obs.charging.state.assessment",
+        "eq",
+        "connected_not_charging"
+      ],
+      "effects": [
+        {
+          "fault": "charging_path",
+          "weight": 2.5
+        },
+        {
+          "fault": "battery_wear",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "A power source was detected but the battery was not charging during the scan.",
+      "limitations": [
+        "Some computer USB ports supply too little power to charge; battery-protection features can pause charging."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "CHG-CHARGING-OK",
+      "group": "charging_obs",
+      "when": [
+        "obs.charging.state.assessment",
+        "in",
+        [
+          "charging",
+          "full"
+        ]
+      ],
+      "effects": [
+        {
+          "fault": "charging_path",
+          "weight": -1.0
+        }
+      ],
+      "rationale": "The phone was charging from the USB connection during the scan.",
+      "limitations": [
+        "Charging at USB-computer currents does not prove fast charging works, nor that the port is free of intermittent faults."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "CHG-INTERMITTENT",
+      "group": "charging_report",
+      "when": [
+        "ans.charging_behavior",
+        "eq",
+        "intermittent"
+      ],
+      "effects": [
+        {
+          "fault": "charging_path",
+          "weight": 3.0
+        }
+      ],
+      "rationale": "Charging that depends on the cable angle almost always means a worn or dirty port or a damaged cable.",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "CHG-NO-RESPONSE",
+      "group": "charging_report",
+      "when": [
+        "ans.charging_behavior",
+        "eq",
+        "no_response"
+      ],
+      "effects": [
+        {
+          "fault": "charging_path",
+          "weight": 2.0
+        },
+        {
+          "fault": "battery_wear",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "No charging response points to the cable, charger, port or charging circuit.",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "CHG-SLOW",
+      "group": "charging_report",
+      "when": [
+        "ans.charging_behavior",
+        "eq",
+        "slow"
+      ],
+      "effects": [
+        {
+          "fault": "charging_path",
+          "weight": 1.0
+        },
+        {
+          "fault": "battery_wear",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "Slow charging is often caused by a dirty port, a weak cable/charger, or a worn battery.",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "CHG-STOPS-PARTWAY",
+      "group": "charging_report",
+      "when": [
+        "ans.charging_behavior",
+        "eq",
+        "stops_partway"
+      ],
+      "effects": [
+        {
+          "fault": "charging_path",
+          "weight": 1.0
+        },
+        {
+          "fault": "battery_wear",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "Charging that stops partway can be a battery fault, overheating protection or a loose connection.",
+      "limitations": [
+        "Battery-protection features (charge limit at 80-85%) cause the same behaviour on purpose."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "CHG-OTHER-CABLE-WORKS",
+      "group": "charging_accessory",
+      "when": [
+        "ans.charging_other_cable",
+        "eq",
+        "works_fine"
+      ],
+      "effects": [
+        {
+          "fault": "charging_path",
+          "weight": -3.0
+        }
+      ],
+      "rationale": "A different cable and charger work, so the original cable or charger is the likely culprit, not the phone.",
+      "limitations": [],
+      "requires_confirmation": false,
+      "notes": [
+        {
+          "severity": "info",
+          "text": "Your original cable or charger appears to be faulty. Replacing the accessory is much cheaper than a phone repair."
+        }
+      ]
+    },
+    {
+      "id": "CHG-OTHER-CABLE-SAME",
+      "group": "charging_accessory",
+      "when": [
+        "ans.charging_other_cable",
+        "eq",
+        "same_problem"
+      ],
+      "effects": [
+        {
+          "fault": "charging_path",
+          "weight": 1.5
+        }
+      ],
+      "rationale": "The problem persists with a known-good cable and charger, which points to the phone.",
+      "limitations": [],
+      "requires_confirmation": false
+    },
+    {
+      "id": "CHG-WIRELESS-WORKS",
+      "group": "charging_wireless",
+      "when": [
+        "ans.wireless_charging",
+        "eq",
+        "works"
+      ],
+      "effects": [
+        {
+          "fault": "charging_path",
+          "weight": 2.0
+        },
+        {
+          "fault": "battery_wear",
+          "weight": -1.0
+        }
+      ],
+      "rationale": "Wireless charging works while cable charging does not, isolating the problem to the port side.",
+      "limitations": [],
+      "requires_confirmation": false
+    },
+    {
+      "id": "CHG-WIRELESS-FAILS",
+      "group": "charging_wireless",
+      "when": [
+        "ans.wireless_charging",
+        "eq",
+        "doesnt_work"
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "Neither wired nor wireless charging works, which points away from the port towards the battery or charging circuit.",
+      "limitations": [],
+      "requires_confirmation": true
+    },
+    {
+      "id": "CHG-PORT-DEBRIS",
+      "group": "port_inspection",
+      "when": [
+        "ans.port_debris",
+        "eq",
+        "debris"
+      ],
+      "effects": [
+        {
+          "fault": "charging_path",
+          "weight": 1.5
+        }
+      ],
+      "rationale": "Lint in the port is a very common cause of poor charging and is often fixed by careful cleaning.",
+      "limitations": [],
+      "requires_confirmation": false,
+      "notes": [
+        {
+          "severity": "info",
+          "text": "Try cleaning the port first (phone off, wooden or plastic toothpick, no liquids). Many 'broken' ports only need cleaning."
+        }
+      ]
+    },
+    {
+      "id": "CHG-PORT-DAMAGE",
+      "group": "port_inspection",
+      "when": [
+        "ans.port_debris",
+        "eq",
+        "damage"
+      ],
+      "effects": [
+        {
+          "fault": "charging_path",
+          "weight": 3.0
+        }
+      ],
+      "rationale": "Visibly bent or loose port parts mean the port needs repair.",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "CHG-PORT-CORROSION",
+      "group": "port_inspection",
+      "when": [
+        "ans.port_debris",
+        "eq",
+        "corrosion"
+      ],
+      "effects": [
+        {
+          "fault": "charging_path",
+          "weight": 2.0
+        },
+        {
+          "fault": "liquid_damage",
+          "weight": 2.0
+        }
+      ],
+      "rationale": "Residue in the port is a sign of liquid exposure and corrosion.",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "CHG-SYMPTOM-REPORTED",
+      "group": "primary_charging",
+      "when": [
+        "ans.primary_symptoms",
+        "contains",
+        "not_charging"
+      ],
+      "effects": [
+        {
+          "fault": "charging_path",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "The customer reports a charging problem.",
+      "limitations": [
+        "Customer-reported symptom area only."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "BATT-SYMPTOM-REPORTED",
+      "group": "primary_battery",
+      "when": [
+        "ans.primary_symptoms",
+        "contains_any",
+        [
+          "battery_drain",
+          "shutdowns"
+        ]
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "The customer reports battery drain or unexpected shutdowns.",
+      "limitations": [
+        "Customer-reported symptom area only."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "DISP-TOUCH-NOT-REGISTERED",
+      "group": "touch_obs",
+      "when": [
+        "obs.input.touchscreen.touchscreen_registered",
+        "eq",
+        false
+      ],
+      "effects": [
+        {
+          "fault": "display_damage",
+          "weight": 2.5
+        }
+      ],
+      "rationale": "The OS has no touchscreen input device registered, which suggests the touch layer or its connector is not detected.",
+      "limitations": [
+        "Output format of 'dumpsys input' varies; a parsing mismatch could produce a false result."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "DISP-CRACKED",
+      "group": "screen_report",
+      "when": [
+        "ans.screen_symptom",
+        "contains_any",
+        [
+          "cracked_glass",
+          "lines_or_spots",
+          "black_screen"
+        ]
+      ],
+      "effects": [
+        {
+          "fault": "display_damage",
+          "weight": 3.0
+        }
+      ],
+      "rationale": "Cracked glass, lines/ink spots, or a black screen on a phone that otherwise works indicate physical display damage.",
+      "limitations": [
+        "Customer-reported; a cracked outer glass does not always mean the display panel is damaged."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "DISP-FLICKER",
+      "group": "screen_flicker",
+      "when": [
+        "ans.screen_symptom",
+        "contains",
+        "flicker"
+      ],
+      "effects": [
+        {
+          "fault": "display_damage",
+          "weight": 1.5
+        },
+        {
+          "fault": "software_instability",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "Flicker can come from a failing display or connector, and sometimes from software (adaptive brightness, refresh-rate bugs).",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "DISP-TOUCH-DEAD",
+      "group": "touch_report",
+      "when": [
+        "ans.touch_symptom",
+        "in",
+        [
+          "dead_areas",
+          "unresponsive"
+        ]
+      ],
+      "effects": [
+        {
+          "fault": "display_damage",
+          "weight": 2.5
+        }
+      ],
+      "rationale": "Dead touch areas usually indicate a damaged touch layer.",
+      "limitations": [
+        "Customer-reported; screen protectors and moisture can cause similar symptoms."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "DISP-GHOST-TOUCH",
+      "group": "touch_report",
+      "when": [
+        "ans.touch_symptom",
+        "eq",
+        "ghost_touches"
+      ],
+      "effects": [
+        {
+          "fault": "display_damage",
+          "weight": 2.0
+        },
+        {
+          "fault": "software_instability",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "Ghost touches are commonly caused by a damaged screen, a swelling battery pressing on it, or charger interference.",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "DISP-TOUCH-FINE",
+      "group": "touch_report",
+      "when": [
+        "ans.touch_symptom",
+        "eq",
+        "works_fine"
+      ],
+      "effects": [
+        {
+          "fault": "display_damage",
+          "weight": -1.0
+        }
+      ],
+      "rationale": "Touch works normally.",
+      "limitations": [],
+      "requires_confirmation": false
+    },
+    {
+      "id": "DISP-RESTART-FIXES",
+      "group": "touch_restart",
+      "when": [
+        "ans.touch_after_restart",
+        "eq",
+        "goes_away"
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 2.0
+        },
+        {
+          "fault": "display_damage",
+          "weight": -1.5
+        }
+      ],
+      "rationale": "Touch problems that a restart clears are more often software than hardware.",
+      "limitations": [
+        "Early-stage hardware faults can also be intermittent."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "DISP-RESTART-PERSISTS",
+      "group": "touch_restart",
+      "when": [
+        "ans.touch_after_restart",
+        "eq",
+        "persists"
+      ],
+      "effects": [
+        {
+          "fault": "display_damage",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "Touch problems that survive a restart are more likely hardware.",
+      "limitations": [],
+      "requires_confirmation": false
+    },
+    {
+      "id": "DISP-DROPPED",
+      "group": "impact",
+      "when": [
+        "ans.physical_event",
+        "in",
+        [
+          "dropped",
+          "both"
+        ]
+      ],
+      "effects": [
+        {
+          "fault": "display_damage",
+          "weight": 1.5
+        },
+        {
+          "fault": "camera_fault",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "Impacts are the leading cause of display damage.",
+      "limitations": [
+        "Many drops cause no damage."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "DISP-SYMPTOM-REPORTED",
+      "group": "primary_display",
+      "when": [
+        "ans.primary_symptoms",
+        "contains_any",
+        [
+          "screen",
+          "touch"
+        ]
+      ],
+      "effects": [
+        {
+          "fault": "display_damage",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "The customer reports a screen or touch problem.",
+      "limitations": [
+        "Customer-reported symptom area only."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "CAM-NONE-ENUMERATED",
+      "group": "camera_obs",
+      "when": [
+        "obs.camera.enumeration.camera_devices",
+        "eq",
+        0
+      ],
+      "effects": [
+        {
+          "fault": "camera_fault",
+          "weight": 3.0
+        }
+      ],
+      "rationale": "The camera service reports no camera devices at all.",
+      "limitations": [
+        "Could also be a camera service crash; restart and re-scan to confirm."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "CAM-SYMPTOM-HARDWARE",
+      "group": "camera_report",
+      "when": [
+        "ans.camera_symptom",
+        "in",
+        [
+          "cracked_lens",
+          "black_image",
+          "one_lens"
+        ]
+      ],
+      "effects": [
+        {
+          "fault": "camera_fault",
+          "weight": 2.5
+        }
+      ],
+      "rationale": "A cracked lens, black preview, or a single failed lens points to a camera hardware fault.",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "CAM-SYMPTOM-BLURRY",
+      "group": "camera_report",
+      "when": [
+        "ans.camera_symptom",
+        "eq",
+        "blurry"
+      ],
+      "effects": [
+        {
+          "fault": "camera_fault",
+          "weight": 1.5
+        }
+      ],
+      "rationale": "Persistent blur can be a damaged autofocus/stabilisation module, but is often a dirty lens or protector.",
+      "limitations": [
+        "Clean the lens first."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "CAM-SYMPTOM-APP",
+      "group": "camera_report",
+      "when": [
+        "ans.camera_symptom",
+        "eq",
+        "wont_open"
+      ],
+      "effects": [
+        {
+          "fault": "camera_fault",
+          "weight": 1.5
+        },
+        {
+          "fault": "software_instability",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "'Camera failed' errors come from either the camera module or camera software.",
+      "limitations": [
+        "Customer-reported."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "CAM-OTHER-APP-WORKS",
+      "group": "camera_other_app",
+      "when": [
+        "ans.camera_other_app",
+        "eq",
+        "works"
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 2.0
+        },
+        {
+          "fault": "camera_fault",
+          "weight": -2.0
+        }
+      ],
+      "rationale": "The camera works in another app, so the hardware is functioning and the default camera app is at fault.",
+      "limitations": [],
+      "requires_confirmation": false
+    },
+    {
+      "id": "CAM-OTHER-APP-FAILS",
+      "group": "camera_other_app",
+      "when": [
+        "ans.camera_other_app",
+        "eq",
+        "fails"
+      ],
+      "effects": [
+        {
+          "fault": "camera_fault",
+          "weight": 1.5
+        }
+      ],
+      "rationale": "The camera fails in every app, which points to the module or its connection.",
+      "limitations": [],
+      "requires_confirmation": false
+    },
+    {
+      "id": "CAM-SYMPTOM-REPORTED",
+      "group": "primary_camera",
+      "when": [
+        "ans.primary_symptoms",
+        "contains",
+        "camera"
+      ],
+      "effects": [
+        {
+          "fault": "camera_fault",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "The customer reports a camera problem.",
+      "limitations": [
+        "Customer-reported symptom area only."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "AUD-HARDWARE-SYMPTOM",
+      "group": "audio_report",
+      "when": [
+        "ans.audio_symptom",
+        "in",
+        [
+          "no_speaker",
+          "no_earpiece",
+          "mic",
+          "distorted"
+        ]
+      ],
+      "effects": [
+        {
+          "fault": "audio_fault",
+          "weight": 2.0
+        }
+      ],
+      "rationale": "A specific speaker, earpiece or microphone problem points to that component (or its grille being blocked).",
+      "limitations": [
+        "Customer-reported; blocked grilles and Bluetooth routing cause similar symptoms."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "AUD-BLUETOOTH-ONLY",
+      "group": "audio_report",
+      "when": [
+        "ans.audio_symptom",
+        "eq",
+        "bluetooth_only"
+      ],
+      "effects": [
+        {
+          "fault": "connectivity_issue",
+          "weight": 2.0
+        },
+        {
+          "fault": "audio_fault",
+          "weight": -1.0
+        }
+      ],
+      "rationale": "Audio problems limited to Bluetooth are a wireless connectivity issue, not a speaker fault.",
+      "limitations": [
+        "The Bluetooth accessory itself may be at fault."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "AUD-HEADPHONES-WORK",
+      "group": "audio_headphones",
+      "when": [
+        "ans.audio_headphones",
+        "eq",
+        "works"
+      ],
+      "effects": [
+        {
+          "fault": "audio_fault",
+          "weight": 1.5
+        }
+      ],
+      "rationale": "Audio works through headphones, isolating the problem to the built-in speaker/earpiece.",
+      "limitations": [],
+      "requires_confirmation": false
+    },
+    {
+      "id": "AUD-HEADPHONES-FAIL",
+      "group": "audio_headphones",
+      "when": [
+        "ans.audio_headphones",
+        "eq",
+        "doesnt_work"
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 1.5
+        },
+        {
+          "fault": "audio_fault",
+          "weight": -1.0
+        }
+      ],
+      "rationale": "No audio through any output suggests a software/audio-system problem rather than one speaker.",
+      "limitations": [
+        "An audio codec hardware fault can also cause this."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "AUD-SYMPTOM-REPORTED",
+      "group": "primary_audio",
+      "when": [
+        "ans.primary_symptoms",
+        "contains",
+        "audio"
+      ],
+      "effects": [
+        {
+          "fault": "audio_fault",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "The customer reports an audio problem.",
+      "limitations": [
+        "Customer-reported symptom area only."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "NET-AIRPLANE-ON",
+      "group": "network_settings",
+      "when": {
+        "all": [
+          [
+            "obs.connectivity.basic.airplane_mode",
+            "eq",
+            true
+          ],
+          [
+            "ans.primary_symptoms",
+            "contains",
+            "network"
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "connectivity_issue",
+          "weight": -1.5
+        }
+      ],
+      "rationale": "Airplane mode was on during the scan, which disables mobile radios by design.",
+      "limitations": [],
+      "requires_confirmation": false,
+      "notes": [
+        {
+          "severity": "info",
+          "text": "Airplane mode is switched ON. Turn it off and check whether the connectivity problem remains."
+        }
+      ]
+    },
+    {
+      "id": "NET-SIM-ABSENT",
+      "group": "sim_obs",
+      "when": {
+        "all": [
+          [
+            "obs.connectivity.basic.sim_absent",
+            "eq",
+            true
+          ],
+          [
+            "ans.network_symptom",
+            "eq",
+            "no_sim"
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "connectivity_issue",
+          "weight": 2.0
+        }
+      ],
+      "rationale": "The OS reports no SIM card, matching the customer's report.",
+      "limitations": [
+        "The SIM may be unseated, damaged or deactivated rather than the phone's SIM reader."
+      ],
+      "requires_confirmation": true,
+      "notes": [
+        {
+          "severity": "info",
+          "text": "Re-seat the SIM card and, if possible, test another SIM before paying for a repair."
+        }
+      ]
+    },
+    {
+      "id": "NET-EVERYWHERE",
+      "group": "network_scope_report",
+      "when": [
+        "ans.network_scope",
+        "eq",
+        "everywhere"
+      ],
+      "effects": [
+        {
+          "fault": "connectivity_issue",
+          "weight": 2.0
+        }
+      ],
+      "rationale": "The problem occurs everywhere while other phones work, pointing to this phone.",
+      "limitations": [
+        "Customer-reported; account or carrier provisioning issues are also possible."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "NET-SOME-PLACES",
+      "group": "network_scope_report",
+      "when": [
+        "ans.network_scope",
+        "eq",
+        "some_places"
+      ],
+      "effects": [
+        {
+          "fault": "connectivity_issue",
+          "weight": -1.5
+        }
+      ],
+      "rationale": "Location-dependent problems usually reflect coverage or the network, not a phone fault.",
+      "limitations": [],
+      "requires_confirmation": false
+    },
+    {
+      "id": "NET-SYMPTOM-REPORTED",
+      "group": "primary_network",
+      "when": [
+        "ans.primary_symptoms",
+        "contains",
+        "network"
+      ],
+      "effects": [
+        {
+          "fault": "connectivity_issue",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "The customer reports a connectivity problem.",
+      "limitations": [
+        "Customer-reported symptom area only."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "LIQ-EXPOSURE",
+      "group": "liquid_report",
+      "when": [
+        "ans.physical_event",
+        "in",
+        [
+          "liquid",
+          "both"
+        ]
+      ],
+      "effects": [
+        {
+          "fault": "liquid_damage",
+          "weight": 3.0
+        },
+        {
+          "fault": "audio_fault",
+          "weight": 1.0
+        },
+        {
+          "fault": "charging_path",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "Reported liquid exposure; speakers, microphones and charging ports are the parts most often affected.",
+      "limitations": [
+        "Customer-reported; water-resistant phones often survive brief exposure."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "LIQ-RECENT",
+      "group": "liquid_timing",
+      "when": [
+        "ans.liquid_timing",
+        "eq",
+        "within_48h"
+      ],
+      "effects": [
+        {
+          "fault": "liquid_damage",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "Recent exposure: damage may still be developing.",
+      "limitations": [],
+      "requires_confirmation": true,
+      "notes": [
+        {
+          "severity": "safety",
+          "text": "Recent liquid exposure: power the phone off, do not charge it, and get it inspected. Charging a wet phone can cause short circuits."
+        }
+      ]
+    },
+    {
+      "id": "LIQ-NONE-REPORTED",
+      "group": "liquid_report",
+      "when": [
+        "ans.physical_event",
+        "in",
+        [
+          "none",
+          "dropped"
+        ]
+      ],
+      "effects": [
+        {
+          "fault": "liquid_damage",
+          "weight": -1.0
+        }
+      ],
+      "rationale": "The customer reports no liquid exposure.",
+      "limitations": [
+        "Exposure is sometimes unnoticed (humidity, rain in a pocket)."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "STOR-SLOW-WRITES",
+      "group": "storage_io_obs",
+      "when": [
+        "obs.storage.io.write_latency_ms",
+        "gte",
+        50
+      ],
+      "effects": [
+        {
+          "fault": "storage_pressure",
+          "weight": 0.5
+        },
+        {
+          "fault": "software_instability",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "Android's own storage benchmark measured slow writes (50 ms or more for a small write).",
+      "limitations": [
+        "Single short benchmark; background activity can slow it. Not proof of a failing storage chip."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "SW-MODIFIED-SYSTEM",
+      "group": "integrity_obs",
+      "when": {
+        "any": [
+          [
+            "obs.device.integrity.verified_boot_state",
+            "in",
+            [
+              "orange",
+              "yellow",
+              "red"
+            ]
+          ],
+          [
+            "obs.device.integrity.bootloader_locked",
+            "eq",
+            false
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 1.0
+        }
+      ],
+      "rationale": "The bootloader is unlocked or the system software is not the manufacturer's verified build.",
+      "limitations": [
+        "Modified software is often stable; this only raises the chance of software-caused problems."
+      ],
+      "requires_confirmation": false,
+      "notes": [
+        {
+          "severity": "info",
+          "text": "This phone runs unlocked or modified system software. Some apps (e.g. banking) may refuse to run, official service centres may decline repairs, and resale value can be lower."
+        }
+      ]
+    },
+    {
+      "id": "TEST-DISPLAY-FAIL",
+      "group": "test_display",
+      "when": [
+        "test.display_colors.outcome",
+        "eq",
+        "fail"
+      ],
+      "effects": [
+        {
+          "fault": "display_damage",
+          "weight": 3.0
+        }
+      ],
+      "rationale": "During the colour test the customer saw lines, spots, dead pixels or patches.",
+      "limitations": [
+        "Result judged by the customer during a guided test."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "TEST-DISPLAY-PASS",
+      "group": "test_display",
+      "when": [
+        "test.display_colors.outcome",
+        "eq",
+        "pass"
+      ],
+      "effects": [
+        {
+          "fault": "display_damage",
+          "weight": -1.5
+        }
+      ],
+      "rationale": "The full-screen colour test showed no visible defects.",
+      "limitations": [
+        "Result judged by the customer during a guided test.",
+        "Faint defects can be missed by eye."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "TEST-TOUCH-GAPS",
+      "group": "test_touch",
+      "when": {
+        "any": [
+          [
+            "test.touch_grid.outcome",
+            "eq",
+            "fail"
+          ],
+          [
+            "test.touch_grid.coverage_pct",
+            "lt",
+            98
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "display_damage",
+          "weight": 3.0
+        }
+      ],
+      "rationale": "Some touchscreen squares did not register touches in the grid test.",
+      "limitations": [
+        "Measured by the phone's browser while the customer dragged a finger; missed squares can also mean the finger skipped them."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "TEST-TOUCH-FULL",
+      "group": "test_touch",
+      "when": {
+        "all": [
+          [
+            "test.touch_grid.outcome",
+            "eq",
+            "pass"
+          ],
+          [
+            "test.touch_grid.coverage_pct",
+            "gte",
+            98
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "display_damage",
+          "weight": -2.0
+        }
+      ],
+      "rationale": "Every square of the touch grid registered a touch.",
+      "limitations": [
+        "Does not test pressure, ghost touches over time or touch near the very edges."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "TEST-SPEAKER-SILENT",
+      "group": "test_speaker",
+      "when": [
+        "test.speaker.outcome",
+        "eq",
+        "fail"
+      ],
+      "effects": [
+        {
+          "fault": "audio_fault",
+          "weight": 2.5
+        }
+      ],
+      "rationale": "No sound was heard from the loudspeaker during the tone test.",
+      "limitations": [
+        "Result judged by the customer during a guided test.",
+        "Check that the media volume is up and no Bluetooth device is connected."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "TEST-SPEAKER-DISTORTED",
+      "group": "test_speaker",
+      "when": [
+        "test.speaker.outcome",
+        "eq",
+        "partial"
+      ],
+      "effects": [
+        {
+          "fault": "audio_fault",
+          "weight": 2.0
+        }
+      ],
+      "rationale": "Test tones were quiet or distorted.",
+      "limitations": [
+        "Result judged by the customer during a guided test.",
+        "A blocked grille causes the same; clean it gently first."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "TEST-SPEAKER-PASS",
+      "group": "test_speaker",
+      "when": [
+        "test.speaker.outcome",
+        "eq",
+        "pass"
+      ],
+      "effects": [
+        {
+          "fault": "audio_fault",
+          "weight": -1.5
+        }
+      ],
+      "rationale": "Test tones were clear through the loudspeaker.",
+      "limitations": [
+        "Result judged by the customer during a guided test.",
+        "Does not test the earpiece or microphone."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "TEST-MIC-FAIL",
+      "group": "test_mic",
+      "when": {
+        "any": [
+          [
+            "test.microphone.outcome",
+            "eq",
+            "fail"
+          ],
+          [
+            "test.microphone.peak_level_dbfs",
+            "lt",
+            -60
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "audio_fault",
+          "weight": 2.5
+        }
+      ],
+      "rationale": "The microphone level barely changed while the customer spoke.",
+      "limitations": [
+        "Measured by the phone's browser; a phone case or finger over the microphone hole affects it."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "TEST-MIC-PASS",
+      "group": "test_mic",
+      "when": {
+        "all": [
+          [
+            "test.microphone.outcome",
+            "eq",
+            "pass"
+          ],
+          [
+            "test.microphone.peak_level_dbfs",
+            "gte",
+            -40
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "audio_fault",
+          "weight": -1.5
+        }
+      ],
+      "rationale": "The microphone picked up the customer's voice at a normal level.",
+      "limitations": [
+        "Only the microphone the browser selected was tested; phones have several."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "TEST-CAMERA-DEAD",
+      "group": "test_camera",
+      "when": {
+        "any": [
+          [
+            "test.camera_rear.outcome",
+            "eq",
+            "fail"
+          ],
+          [
+            "test.camera_front.outcome",
+            "eq",
+            "fail"
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "camera_fault",
+          "weight": 3.0
+        }
+      ],
+      "rationale": "A camera did not start or stayed black in the camera test.",
+      "limitations": [
+        "If other apps can use the camera, the browser permission may be the cause."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "TEST-CAMERA-POOR",
+      "group": "test_camera",
+      "when": {
+        "any": [
+          [
+            "test.camera_rear.outcome",
+            "eq",
+            "partial"
+          ],
+          [
+            "test.camera_front.outcome",
+            "eq",
+            "partial"
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "camera_fault",
+          "weight": 1.5
+        }
+      ],
+      "rationale": "The camera worked but the image was blurry, dark or stained.",
+      "limitations": [
+        "Result judged by the customer during a guided test.",
+        "A dirty lens or lens cover causes the same; clean it first."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "TEST-CAMERA-PASS",
+      "group": "test_camera",
+      "when": {
+        "all": [
+          [
+            "test.camera_rear.outcome",
+            "eq",
+            "pass"
+          ],
+          [
+            "test.camera_rear.stream_started",
+            "eq",
+            true
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "camera_fault",
+          "weight": -2.0
+        }
+      ],
+      "rationale": "The rear camera preview started (measured) and looked clear (customer judgement).",
+      "limitations": [
+        "The browser uses one rear camera; other lenses are not tested."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "TEST-VIBRATION-FAIL",
+      "group": "test_vibration",
+      "when": [
+        "test.vibration.outcome",
+        "eq",
+        "fail"
+      ],
+      "effects": [],
+      "rationale": "No vibration was felt during the vibration test.",
+      "limitations": [
+        "Result judged by the customer during a guided test."
+      ],
+      "requires_confirmation": false,
+      "notes": [
+        {
+          "severity": "info",
+          "text": "The vibration motor did not respond in the test. Check that vibration is enabled in sound settings; if it is, a technician should inspect the motor."
+        }
+      ]
+    },
+    {
+      "id": "TEST-SENSORS-FAIL",
+      "group": "test_sensors",
+      "when": [
+        "test.motion_sensors.outcome",
+        "eq",
+        "fail"
+      ],
+      "effects": [],
+      "rationale": "The motion sensors produced no changing readings.",
+      "limitations": [
+        "The browser may block motion access."
+      ],
+      "requires_confirmation": false,
+      "notes": [
+        {
+          "severity": "info",
+          "text": "The motion sensors did not respond in the browser test. Auto-rotate and step counting may not work; a technician can confirm with the manufacturer's diagnostic app."
+        }
+      ]
+    },
+    {
+      "id": "TEST-BUTTONS-FAIL",
+      "group": "test_buttons",
+      "when": [
+        "test.buttons.outcome",
+        "eq",
+        "fail"
+      ],
+      "effects": [],
+      "rationale": "At least one physical button did not respond.",
+      "limitations": [
+        "Result judged by the customer during a guided test."
+      ],
+      "requires_confirmation": false,
+      "notes": [
+        {
+          "severity": "info",
+          "text": "A button did not respond. Remove the case (it can press or block buttons); if it persists, the button or its flex cable needs professional repair."
+        }
+      ]
+    },
+    {
+      "id": "TEST-CHARGE-NONE",
+      "group": "test_charging",
+      "when": [
+        "test.charging_connector.outcome",
+        "eq",
+        "fail"
+      ],
+      "effects": [
+        {
+          "fault": "charging_path",
+          "weight": 3.0
+        }
+      ],
+      "rationale": "The phone was connected to power for the whole test but never charged (battery below 80%).",
+      "limitations": [
+        "Measured by the agent from the phone's own battery status. Some computer USB ports supply too little power; try a wall charger before paying for a repair."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "TEST-CHARGE-FLAKY",
+      "group": "test_charging",
+      "when": {
+        "any": [
+          [
+            "test.charging_connector.outcome",
+            "eq",
+            "partial"
+          ],
+          [
+            "test.charging_connector.plug_events",
+            "gte",
+            2
+          ],
+          [
+            "test.charging_connector.adb_disconnects",
+            "gte",
+            1
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "charging_path",
+          "weight": 3.0
+        }
+      ],
+      "rationale": "The power connection dropped while the plug was moved (measured by the agent), which is typical of a worn, loose or dirty charging port or a damaged cable.",
+      "limitations": [
+        "Try another cable to rule out the cable itself."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "TEST-CHARGE-OK",
+      "group": "test_charging",
+      "when": {
+        "all": [
+          [
+            "test.charging_connector.outcome",
+            "eq",
+            "pass"
+          ],
+          [
+            "test.charging_connector.charging_observed",
+            "eq",
+            true
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "charging_path",
+          "weight": -2.5
+        }
+      ],
+      "rationale": "The connection stayed stable and the phone charged while the plug was moved.",
+      "limitations": [
+        "Computer USB charging is slow; this does not test fast charging."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "TEST-EARPIECE-FAIL",
+      "group": "test_earpiece",
+      "when": {
+        "any": [
+          [
+            "test.earpiece_call.outcome",
+            "eq",
+            "fail"
+          ],
+          [
+            "test.earpiece_call.outcome",
+            "eq",
+            "partial"
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "audio_fault",
+          "weight": 2.5
+        }
+      ],
+      "rationale": "The earpiece was silent or poor during a test call.",
+      "limitations": [
+        "Result judged by the customer during a guided test.",
+        "Poor network coverage also degrades calls."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "TEST-DATA-FAIL",
+      "group": "test_data",
+      "when": [
+        "test.mobile_data.outcome",
+        "eq",
+        "fail"
+      ],
+      "effects": [
+        {
+          "fault": "connectivity_issue",
+          "weight": 2.0
+        }
+      ],
+      "rationale": "A website did not load over mobile data.",
+      "limitations": [
+        "Result judged by the customer during a guided test.",
+        "Data plans, APN settings and coverage can cause this."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "TEST-DATA-PASS",
+      "group": "test_data",
+      "when": [
+        "test.mobile_data.outcome",
+        "eq",
+        "pass"
+      ],
+      "effects": [
+        {
+          "fault": "connectivity_issue",
+          "weight": -1.5
+        }
+      ],
+      "rationale": "A website loaded over mobile data.",
+      "limitations": [
+        "Result judged by the customer during a guided test."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "BR-APP-CRASHES",
+      "group": "bugreport_crashes",
+      "when": {
+        "any": [
+          [
+            "obs.bugreport.summary.fatal_exceptions",
+            "gte",
+            10
+          ],
+          [
+            "obs.bugreport.summary.anr_events",
+            "gte",
+            10
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 1.5
+        }
+      ],
+      "rationale": "The bug report contains many app crashes or freezes.",
+      "limitations": [
+        "Counts come from the logs still held by the phone; they show instability, not its root cause."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "BR-SYSTEM-FAILURES",
+      "group": "bugreport_system",
+      "when": {
+        "any": [
+          [
+            "obs.bugreport.summary.watchdog_events",
+            "gte",
+            1
+          ],
+          [
+            "obs.bugreport.summary.kernel_panic_events",
+            "gte",
+            1
+          ]
+        ]
+      },
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 2.0
+        }
+      ],
+      "rationale": "The bug report records a system watchdog reset or kernel panic.",
+      "limitations": [
+        "Counts come from the logs still held by the phone; they show instability, not its root cause.",
+        "Kernel panics can also come from hardware faults."
+      ],
+      "requires_confirmation": true
+    },
+    {
+      "id": "BR-LOW-MEMORY",
+      "group": "bugreport_memory",
+      "when": [
+        "obs.bugreport.summary.low_memory_kills",
+        "gte",
+        30
+      ],
+      "effects": [
+        {
+          "fault": "software_instability",
+          "weight": 1.0
+        },
+        {
+          "fault": "storage_pressure",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "Android repeatedly killed apps to free memory, which causes reloading and slowness.",
+      "limitations": [
+        "Counts come from the logs still held by the phone; they show instability, not its root cause.",
+        "Some low-memory kills are normal on phones with little RAM."
+      ],
+      "requires_confirmation": false
+    },
+    {
+      "id": "BR-THERMAL",
+      "group": "bugreport_thermal",
+      "when": [
+        "obs.bugreport.summary.thermal_shutdown_events",
+        "gte",
+        1
+      ],
+      "effects": [
+        {
+          "fault": "battery_wear",
+          "weight": 1.0
+        },
+        {
+          "fault": "software_instability",
+          "weight": 0.5
+        }
+      ],
+      "rationale": "The bug report records a thermal shutdown.",
+      "limitations": [
+        "Counts come from the logs still held by the phone; they show instability, not its root cause.",
+        "Heavy use in a hot place can cause this on a healthy phone."
+      ],
+      "requires_confirmation": true
+    }
+  ]
+}

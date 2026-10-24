@@ -1,0 +1,7 @@
+Battery History (12% used, 64KB used of 512KB, 120 strings using 8KB):
+                    0 (15) RESET:TIME: 2026-10-18-10-00-00
+  Estimated battery capacity: 4000 mAh
+  Last learned battery capacity: 3120 mAh
+  Min learned battery capacity: 3080 mAh
+  Max learned battery capacity: 3990 mAh
+  Uid u0a123: 12.3 ( cpu=11.1 ) com.private.app

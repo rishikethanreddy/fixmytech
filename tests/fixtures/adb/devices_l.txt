@@ -1,0 +1,6 @@
+List of devices attached
+R5CR20ABCDE            device usb:1-4 product:o1sxeea model:SM_G991B device:o1s transport_id:3
+emulator-5554          unauthorized transport_id:1
+0123456789ABCDEF       offline transport_id:2
+HT7A1B234567           no permissions (user in plugdev group; are your udev rules wrong?); see [http://developer.android.com/tools/device.html]
+

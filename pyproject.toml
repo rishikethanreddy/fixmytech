@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fixmytech"
+version = "0.4.0"
+description = "Smartphone diagnostic, repair-cost estimation and repair-vs-replace decision platform"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.120",
+    "starlette>=0.50",  # CORSMiddleware(allow_private_network=...)
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "httpx>=0.27",
+    "sqlalchemy>=2.0",
+]
+
+[project.optional-dependencies]
+ml = ["scikit-learn>=1.5", "pandas>=2.2", "numpy>=1.26", "joblib>=1.4"]
+dev = ["pytest>=8", "ruff>=0.5", "mypy>=1.10", "pip-audit>=2.7"]
+browser = ["playwright>=1.45"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+fixmytech = ["data/*.json", "data/*.csv"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "hardware: requires a physical, authorized Android device (deselected by default)",
+    "browser: drives the real UI in Edge/Chrome via Playwright (deselected by default)",
+]
+addopts = "-m 'not hardware and not browser'"
+filterwarnings = ["ignore:.*httpx2.*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "BLE"]
+ignore = ["S101", "B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "BLE"]
+# The agent deliberately invokes adb via subprocess with fixed argv lists (no shell).
+"src/fixmytech/agent/adb.py" = ["S603"]
+# Synthetic test data does not need cryptographic randomness.
+"src/fixmytech/ml/synthetic.py" = ["S311"]
+
+[tool.mypy]
+python_version = "3.11"
+packages = ["fixmytech"]
+mypy_path = "src"
+ignore_missing_imports = true
+warn_unused_ignores = true
+check_untyped_defs = true

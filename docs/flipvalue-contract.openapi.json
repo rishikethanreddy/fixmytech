@@ -1,0 +1,253 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FlipValue valuation API - PROPOSED contract v1 (pending partner agreement)",
+    "version": "1.0-proposed",
+    "description": "Generated from FixMyTech's FlipValue request/response schemas. This is NOT an assertion that FlipValue implements it. See INTEGRATION_CONTRACT.md."
+  },
+  "paths": {
+    "/v1/valuations": {
+      "post": {
+        "summary": "Valuations",
+        "operationId": "valuations_v1_valuations_post",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValuationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ConditionGrade": {
+        "type": "string",
+        "enum": [
+          "excellent",
+          "good",
+          "fair",
+          "poor",
+          "faulty"
+        ],
+        "title": "ConditionGrade",
+        "description": "Cosmetic + functional condition. Definitions are in INTEGRATION_CONTRACT.md."
+      },
+      "ConditionSpec": {
+        "properties": {
+          "grade": {
+            "$ref": "#/components/schemas/ConditionGrade"
+          },
+          "faults": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 9,
+            "title": "Faults"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "grade"
+        ],
+        "title": "ConditionSpec"
+      },
+      "DeviceSpec": {
+        "properties": {
+          "manufacturer": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Manufacturer"
+          },
+          "model": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Model"
+          },
+          "storage_gb": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 4096.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Gb"
+          },
+          "age_months": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 240.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age Months"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "manufacturer",
+          "model"
+        ],
+        "title": "DeviceSpec"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "RepairScenario": {
+        "properties": {
+          "repair_type": {
+            "type": "string",
+            "title": "Repair Type"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "repair_type"
+        ],
+        "title": "RepairScenario"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "ValuationRequest": {
+        "properties": {
+          "device": {
+            "$ref": "#/components/schemas/DeviceSpec"
+          },
+          "region": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "title": "Region",
+            "description": "ISO 3166-1 alpha-2 market"
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "title": "Currency",
+            "description": "ISO 4217 currency requested"
+          },
+          "condition": {
+            "$ref": "#/components/schemas/ConditionSpec"
+          },
+          "repair_scenario": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RepairScenario"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "device",
+          "region",
+          "currency",
+          "condition"
+        ],
+        "title": "ValuationRequest"
+      }
+    },
+    "securitySchemes": {
+      "ApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    }
+  },
+  "security": [
+    {
+      "ApiKey": []
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+INPUT MANAGER (dumpsys input)
+
+Event Hub State:
+  BuiltInKeyboardId: -2
+  Devices:
+    3: sec_touchscreen
+      Classes: TOUCH | TOUCH_MT
+Input Reader State (Nums of external devices: 0):
+  Device 3: sec_touchscreen
+    Sources: TOUCHSCREEN
+    Touch Input Mapper (mode - DIRECT):
+      Parameters:
+        DeviceType: touchScreen

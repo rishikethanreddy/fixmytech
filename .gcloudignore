@@ -1,0 +1,21 @@
+.gcloudignore
+.git
+.gitignore
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+var/
+*.db
+*.db-wal
+*.db-shm
+.env
+tests/
+# Explicitly allow pricing_seed directory so Cloud Run has the seed dataset
+!pricing_seed
+!pricing_seed/**

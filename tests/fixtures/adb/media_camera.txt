@@ -1,0 +1,7 @@
+== Service global info: ==
+
+Number of camera devices: 4
+Number of normal camera devices: 4
+Number of public camera devices visible to API1: 2
+Active Camera Clients:
+[]

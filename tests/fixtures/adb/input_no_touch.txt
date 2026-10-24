@@ -1,0 +1,9 @@
+INPUT MANAGER (dumpsys input)
+
+Event Hub State:
+  Devices:
+    1: gpio-keys
+      Classes: KEYBOARD
+Input Reader State (Nums of external devices: 0):
+  Device 1: gpio-keys
+    Sources: KEYBOARD

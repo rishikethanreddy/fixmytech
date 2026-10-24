@@ -1,0 +1,13 @@
+========================================================
+== dumpstate: 2026-10-19 09:00:00
+========================================================
+------ SYSTEM LOG (logcat -v threadtime -v printable -v uid -d *:v) ------
+10-19 08:12:01.123  1000  2101  2101 E AndroidRuntime: FATAL EXCEPTION: main
+10-19 08:12:01.124  1000  2101  2101 E AndroidRuntime: Process: com.example.app, PID: 2101
+10-19 08:15:40.000  1000  1500  1520 E ActivityManager: ANR in com.example.maps
+10-19 08:20:00.000  1000   600   600 I lowmemorykiller: Kill 'com.example.game' (1234), uid 10123
+10-19 08:20:05.000  1000   600   600 I lmkd: Kill 'com.example.music' (2345)
+10-19 08:30:00.000  1000  1500  1520 E AndroidRuntime: FATAL EXCEPTION: worker-3
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+Build fingerprint: 'samsung/o1sxeea/o1s:14'
+user jane.doe@example.com signed in from 192.168.1.20

@@ -1,0 +1,22 @@
+Drop box contents: 9 entries
+Max entries: 1000
+Searching for: 
+
+2026-10-01 08:00:00 SYSTEM_BOOT (text, 512 bytes)
+    Build: samsung/o1sxeea/o1s:14
+2026-10-14 09:10:11 data_app_crash (text, 3456 bytes)
+    Process: com.example.chat
+2026-10-15 09:11:12 data_app_crash (text, 3456 bytes)
+    Process: com.example.chat
+2026-10-16 10:00:00 data_app_anr (text, 9000 bytes)
+    Process: com.example.maps
+2026-10-17 11:00:00 system_server_crash (text, 4000 bytes)
+    Process: system_server
+2026-10-18 12:00:00 SYSTEM_TOMBSTONE (compressed text, 1200 bytes)
+    Build fingerprint: 'samsung/o1sxeea'
+2026-10-18 13:00:00 SYSTEM_LAST_KMSG (compressed text, 99999 bytes)
+    [    0.000000] Booting Linux
+2026-10-18 14:00:00 system_app_crash (text, 3456 bytes)
+    Process: com.android.systemui
+2026-09-01 08:00:00 data_app_crash (text, 3456 bytes)
+    Process: com.old.app

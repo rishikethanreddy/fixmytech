@@ -1,0 +1,14 @@
+Captured sensor HAL info:
+Sensor Device:
+Total 4 h/w sensors, 4 running 0 disabled clients:
+Sensor List:
+0x00000001) LSM6DSO Accelerometer    | STMicro         | ver: 1 | type: android.sensor.accelerometer(1) | perm: n/a | flags: 0x00000000
+	continuous | minRate=1.00Hz | maxRate=416.00Hz | FIFO (max,reserved) = (10000, 3000) events | non-wakeUp | 
+0x00000002) LSM6DSO Gyroscope        | STMicro         | ver: 1 | type: android.sensor.gyroscope(4) | perm: n/a | flags: 0x00000000
+	continuous | minRate=1.00Hz | maxRate=416.00Hz | non-wakeUp | 
+0x00000003) TMD3725 Proximity        | AMS             | ver: 1 | type: android.sensor.proximity(8) | perm: n/a | flags: 0x00000003
+	on-change | wakeUp | 
+0x00000004) TMD3725 Light            | AMS             | ver: 1 | type: android.sensor.light(5) | perm: n/a | flags: 0x00000002
+	on-change | non-wakeUp | 
+Fusion States:
+9-axis fusion disabled (0 clients), gyro-rate= 200.00Hz
