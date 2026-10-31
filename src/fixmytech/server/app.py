@@ -84,6 +84,7 @@ def create_app(settings: Settings | None = None, flipvalue: FlipValueClient | No
         valuation_limiter=SlidingWindowLimiter(settings.valuation_limit_per_hour, 3600),
         partner_store=PartnerStore(Path(settings.partner_config_path)),
         partner_limiter=SlidingWindowLimiter(20, 3600),
+        market_limiter=SlidingWindowLimiter(120, 3600),
     )
     install_error_handlers(app)
     if settings.cors_origin_list:

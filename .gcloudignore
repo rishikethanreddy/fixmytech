@@ -19,3 +19,7 @@ tests/
 # Explicitly allow pricing_seed directory so Cloud Run has the seed dataset
 !pricing_seed
 !pricing_seed/**
+
+# Not part of the app
+*.pptx
+*.zip

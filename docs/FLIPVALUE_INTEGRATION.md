@@ -73,6 +73,27 @@ Built in `server/services.py::build_valuation_request` from the session:
 request, response}` on success, or `{ok: false, error_code, requested_at, source, request}` on failure.
 **No values are ever stored or displayed for a failed call**, and there is no fallback estimate.
 
+## Market data: trends, store prices, repair-or-sell (v0.5.0)
+
+The "Costs, value & decision" step (tabs: Repair costs, Resale value, Decision) also shows the data FlipValue
+shows on its own site. All calls go server-side through `integrations/flipvalue/market.py`, with the same base URL
+and key as valuations. Each call tries the keyed endpoint first and falls back to FlipValue's public endpoint when the
+keyed one is missing (404/405) or the key lacks the scope (403). A 401 is reported as a key problem, never retried
+on the public endpoint.
+
+| Data | Keyed endpoint (preferred) | Public fallback | Shown in |
+|---|---|---|---|
+| Catalogue match | `GET /api/v1/products?q=` | `GET /api/catalogue?q=` | all tabs (by OEM code, then exact name; never a loose match) |
+| Price trend | `GET /api/v1/trends` | `GET /api/trends` | Resale value |
+| Store prices | `GET /api/v1/market-prices` | `GET /api/market/offers` | Resale value |
+| Repair or sell | `POST /api/v1/decision` | `POST /api/decision` | Decision |
+
+FixMyTech endpoints: `GET /api/v1/sessions/{id}/market?grade=&storage_gb=` and
+`POST /api/v1/sessions/{id}/market/compare`. GET results are cached for 10 minutes per phone/storage/grade; each
+session may make 120 market calls per hour. Rows marked `is_mock` and non-https links are dropped. When FlipValue has
+no record (unknown model, `available: false`, an empty group), the UI says "No data for this phone" and shows the
+reason; nothing is filled in.
+
 ## Failure handling
 
 Diagnosis, repair estimates and the decision engine keep working without FlipValue. The decision step then shows

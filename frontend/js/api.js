@@ -83,6 +83,8 @@ export function sessionApi(id) {
     valuation: () => s("GET", "/valuation"),
     requestValuation: (body) => s("POST", "/valuation", body, { timeoutMs: 45000 }),
     decision: (body) => s("POST", "/decision", body),
+    market: (q) => s("GET", `/market?${new URLSearchParams(q)}`, undefined, { timeoutMs: 45000 }),
+    marketCompare: (body) => s("POST", "/market/compare", body, { timeoutMs: 45000 }),
     report: () => s("GET", "/report"),
     tests: () => s("GET", "/tests"),
     putTest: (tid, result) => s("PUT", `/tests/${encodeURIComponent(tid)}`, result),

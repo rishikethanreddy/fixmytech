@@ -26,9 +26,7 @@ const STEPS = [
   ["tests", "Tests"],
   ["questions", "Questions"],
   ["diagnosis", "Diagnosis"],
-  ["repair", "Repair cost"],
-  ["value", "Resale value", null, true],
-  ["decision", "Decision"],
+  ["costs", "Costs & value", null, true],
   ["report", "Report"],
 ];
 
@@ -40,7 +38,7 @@ function completion(session) {
     findings: session.has_scan,
     tests: p.tests_complete,
     questions: p.questions_complete,
-    decision: session.has_decision,
+    costs: session.has_decision,
   };
 }
 

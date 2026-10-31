@@ -1,6 +1,6 @@
 import { api } from "../api.js";
 import { agentPairing, history } from "../store.js";
-import { html, mount, callout, errorBox, formData, numOrNull, $ } from "../ui.js";
+import { html, mount, callout, errorBox, formData, numOrNull, toast, $ } from "../ui.js";
 import { isLoopback } from "../agent.js";
 
 const ICON = {
@@ -177,7 +177,8 @@ export async function startView(ctx) {
   });
 }
 
-// Landing point of the agent's pairing link: stores the token for this browser, then removes it from the URL.
+// Landing point of the agent's pairing link (opened each time the agent starts): stores the token for this browser,
+// then always goes to the start page. Earlier reports stay reachable from "My reports".
 export async function pairView(ctx) {
   const url = ctx.query.get("agent") || "http://127.0.0.1:8765";
   const token = ctx.query.get("token");
@@ -187,13 +188,7 @@ export async function pairView(ctx) {
     return;
   }
   agentPairing.set(url, token);
-  const latest = history.list().find((s) => s.mode === "usb");
-  mount(ctx.el, html`
-    <div class="card stack">
-      ${callout("ok", "This browser is paired with the FixMyTech agent", "The pairing lasts until the agent stops. Each time it starts, it prints a new pairing link.")}
-      <div class="row">
-        ${latest ? html`<a class="btn btn-primary" href="#/s/${latest.id}/connect">Continue: ${latest.label}</a>` : ""}
-        <a class="btn ${latest ? "" : "btn-primary"}" href="#/start?mode=usb">Start a new USB diagnosis</a>
-      </div>
-    </div>`);
+  toast("This browser is paired with the FixMyTech agent.");
+  window.history.replaceState(null, "", `${location.pathname}#/`);
+  ctx.rerender();
 }

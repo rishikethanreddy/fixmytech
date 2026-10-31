@@ -126,6 +126,9 @@ def test_manual_journey_shows_source_attributed_price(page, stack):
     page.click('#q-form button[type="submit"]')
     page.wait_for_selector("text=Choose an answer to continue")
     page.goto(f"{stack['base']}/#/s/{sid}/repair")
+    # the costs step is optional: it asks first
+    page.wait_for_selector("text=Want to see if it's worth fixing?")
+    page.click('button[data-optin="yes"]')
     page.wait_for_selector("text=Exact model: Galaxy S24 Ultra (SM-S928B)")
     page.wait_for_selector("text=Before tax")
     page.click("#quote-form button[type=submit]")  # empty amount -> inline validation, no request
@@ -135,8 +138,11 @@ def test_manual_journey_shows_source_attributed_price(page, stack):
 def test_usb_scan_and_phone_test_page(page, stack):
     base = stack["base"]
     page.goto(f"{base}/#/pair?agent=http%3A%2F%2F127.0.0.1%3A{stack['agent_port']}&token={AGENT_TOKEN}")
+    # the agent's pairing link always lands on the start page (no "continue" screen), with a confirmation toast
     page.wait_for_selector("text=This browser is paired")
-    page.click("text=Start a new USB diagnosis")
+    page.wait_for_selector("text=Find out what's wrong with your phone")
+    assert page.url.endswith("#/")
+    page.click("text=Diagnose with a USB cable")
     page.check('input[name="consent_processing"]')
     page.click("#start-form button[type=submit]")
     page.click('button[data-action="select"]')
@@ -147,6 +153,12 @@ def test_usb_scan_and_phone_test_page(page, stack):
     page.goto(f"{base}/#/s/{sid}/tests")
     page.click('button[data-t="link"]')
     path = "/p/" + page.inner_text(".cmd").split("/p/")[1].strip()
+    # the charging test's consent tick survives the background refresh of results (every 5 s once a link exists)
+    page.click("button.flow-step:has-text('Charging')")
+    page.click("label.check:has(input[data-consent])")
+    assert page.is_checked("input[data-consent]")
+    page.wait_for_timeout(6000)
+    assert page.is_checked("input[data-consent]")
     page.goto(base + path)
     page.wait_for_selector("text=Each test takes under a minute")
     page.click('button[data-skip="vibration"]')
@@ -160,18 +172,20 @@ def test_tests_page_completion_and_question_skipping(page, stack):
     page.goto(f"{base}/#/start?mode=manual")
     page.check('input[name="consent_processing"]')
     page.click("#start-form button[type=submit]")
-    page.wait_for_selector("text=0 of 11 tests done")
+    page.wait_for_selector(".flow-stat:has-text('0/11')")
+    # the tests run as a flow: one section at a time, with the progress bar on top
+    page.wait_for_selector("text=Section 1 of 2")
+    page.wait_for_selector(".flow-title:has-text('On your phone')")
+    page.click("button[data-skip-section='phone']")
+    # a skipped section slides on to the next one by itself
+    page.wait_for_selector(".flow-title:has-text('Quick checks')")
     page.click('button[data-manual="buttons"][data-outcome="pass"]')
-    page.wait_for_selector("text=1 of 11 tests done")
-    # skip everything else: the section is then complete, and the step shows a check mark
-    for _ in range(12):
-        if "11 of 11" in page.inner_text("#tests-summary"):
-            break
-        btns = page.query_selector_all("button[data-skip]") or page.query_selector_all(
-            "button[data-manual][data-outcome='not_run']")
-        btns[0].click()
-        page.wait_for_timeout(300)
+    page.wait_for_selector("#tests-body .badge:has-text('Passed')")
+    page.click("button[data-skip-section='manual']")
+    page.wait_for_selector(".flow-stat:has-text('11/11')")
+    # finishing the last section slides on to the summary
     page.wait_for_selector("text=All tests done. This section is complete.")
+    page.wait_for_selector("text=Hands-on tests finished")
     page.reload()
     page.wait_for_selector('.stepper a.done[href$="/tests"]')
 

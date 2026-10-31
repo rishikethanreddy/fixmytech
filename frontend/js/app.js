@@ -6,7 +6,7 @@ import { connectView, scanView } from "./views/connect.js";
 import { findingsView, questionsView, diagnosisView } from "./views/diagnose.js";
 import { testsView } from "./views/tests.js";
 import { initThemeToggle } from "./theme-toggle.js";
-import { repairView, valueView, decisionView } from "./views/money.js";
+import { moneyView } from "./views/money.js";
 import { reportView, historyView } from "./views/report.js";
 import { privacyView, supportView, settingsView } from "./views/info.js";
 
@@ -25,9 +25,11 @@ const routes = [
   [new RegExp(`^/s/${SID}/tests$`), testsView],
   [new RegExp(`^/s/${SID}/questions$`), questionsView],
   [new RegExp(`^/s/${SID}/diagnosis$`), diagnosisView],
-  [new RegExp(`^/s/${SID}/repair$`), repairView],
-  [new RegExp(`^/s/${SID}/value$`), valueView],
-  [new RegExp(`^/s/${SID}/decision$`), decisionView],
+  [new RegExp(`^/s/${SID}/costs$`), (ctx) => moneyView(ctx, "repair")],
+  // Older links to the three separate steps open the matching tab.
+  [new RegExp(`^/s/${SID}/repair$`), (ctx) => moneyView(ctx, "repair")],
+  [new RegExp(`^/s/${SID}/value$`), (ctx) => moneyView(ctx, "value")],
+  [new RegExp(`^/s/${SID}/decision$`), (ctx) => moneyView(ctx, "decision")],
   [new RegExp(`^/s/${SID}/report$`), reportView],
 ];
 

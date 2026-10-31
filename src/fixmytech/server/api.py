@@ -28,6 +28,8 @@ from fixmytech.integrations.flipvalue.client import (
     FlipValueTimeoutError,
     FlipValueUnsupportedDeviceError,
 )
+from fixmytech.integrations.flipvalue.market import FlipValueNoDataError, MarketClient
+from fixmytech.integrations.flipvalue.schemas import ConditionGrade
 from fixmytech.pricing.sources import SOURCES
 from fixmytech.server import partner as partner_svc
 from fixmytech.server import services as svc
@@ -442,6 +444,74 @@ def request_valuation(inp: svc.ValuationInput, rec: SessionDep, st: StateDep, db
     }
     _save(db, rec)
     return rec.valuation
+
+
+_MARKET_MESSAGES = {
+    **_FV_MESSAGES,
+    "flipvalue_no_data": "FlipValue has no data for this phone.",
+    "flipvalue_unavailable": "This FlipValue service does not provide this data right now.",
+}
+
+
+def _market_client(st: svc.AppState, rec: DiagnosticSession) -> MarketClient:
+    resolved = partner_svc.resolve_client(st)
+    if resolved is None:
+        raise ApiError(409, "valuation_not_configured",
+                       "Market data needs a FlipValue API key. Add it in Settings; nothing is estimated without it.")
+    if st.market_limiter:
+        ok, retry = st.market_limiter.allow(rec.id)
+        if not ok:
+            raise ApiError(429, "market_rate_limited", "Too many FlipValue requests for this session.",
+                           headers={"Retry-After": str(int(retry) + 1)})
+    return MarketClient(resolved.client)
+
+
+def _market_part(fetch: Any) -> dict[str, Any]:
+    """One section of the market view. A failure becomes 'no data' with its reason; nothing is filled in."""
+    try:
+        return fetch()
+    except FlipValueError as exc:
+        log.info("flipvalue market section failed code=%s", exc.code)
+        return {"available": False, "error_code": exc.code,
+                "reason": exc.message if isinstance(exc, FlipValueNoDataError)
+                else _MARKET_MESSAGES.get(exc.code, "FlipValue could not provide this data.")}
+
+
+@router.get("/sessions/{session_id}/market")
+def get_market(rec: SessionDep, st: StateDep, grade: ConditionGrade = ConditionGrade.GOOD,
+               storage_gb: int | None = None) -> dict[str, Any]:
+    """FlipValue's trends and store prices for this phone, as shown on FlipValue's own site."""
+    market = _market_client(st, rec)
+    device = svc.device_of(rec)
+    base: dict[str, Any] = {"region": device.region, "grade": grade.value, "product": None, "storage_gb": None,
+                            "trend": None, "offers": None}
+    if not device.manufacturer or not device.model:
+        return {**base, "status": "device_details_required",
+                "message": "FlipValue needs the phone's manufacturer and model."}
+    try:
+        product = market.find_product(device.manufacturer, device.model)
+    except FlipValueError as exc:
+        no_data = isinstance(exc, FlipValueNoDataError)
+        return {**base, "status": "no_product" if no_data else "error", "error_code": exc.code,
+                "message": f"FlipValue has no data for {device.manufacturer} {device.model}." if no_data
+                else _MARKET_MESSAGES.get(exc.code, "FlipValue could not be reached.")}
+    sizes = product["storage_gb"]
+    wanted = storage_gb or device.storage_gb
+    storage = wanted if not sizes or wanted in sizes else sizes[0]
+    if storage is None:
+        return {**base, "status": "ok", "product": product, "message": "Choose a storage size."}
+    return {**base, "status": "ok", "product": product, "storage_gb": storage,
+            "storage_matched": wanted == storage,
+            "trend": _market_part(lambda: market.trend(product["id"], storage, device.region, grade.value)),
+            "offers": _market_part(lambda: market.offers(product["id"], storage, device.region))}
+
+
+@router.post("/sessions/{session_id}/market/compare")
+def post_market_compare(body: svc.MarketCompareInput, rec: SessionDep, st: StateDep) -> dict[str, Any]:
+    """FlipValue's repair-or-sell comparison for the values the customer is using."""
+    market = _market_client(st, rec)
+    payload = {**body.model_dump(exclude_none=True), "repair_cost_basis": "user_supplied"}
+    return _market_part(lambda: {"available": True, **market.compare(payload)})
 
 
 # ---------------------------------------------------------------------------- partner service settings

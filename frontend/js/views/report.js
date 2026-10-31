@@ -48,7 +48,7 @@ export async function reportView(ctx) {
     </section><br>
 
     <section class="stack"><h2>5. Repair, sell or replace</h2>
-      ${report.decision ? decisionBody(report.decision.result, report.decision.request) : html`<p class="small muted">No comparison yet. <a href="#/s/${id}/decision">Compare options</a>.</p>`}
+      ${report.decision ? decisionBody(report.decision.result, report.decision.request) : html`<p class="small muted">No comparison yet. <a href="#/s/${id}/costs?tab=decision">Compare options</a>.</p>`}
     </section><br>
 
     <section class="card stack no-print">

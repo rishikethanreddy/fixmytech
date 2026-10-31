@@ -385,7 +385,7 @@ export async function diagnosisView(ctx) {
     ${stepper(id, "diagnosis", session)}
     <div class="page-head row-between"><div><h1>Likely causes</h1>
       <p>Ranked by how well the evidence supports each one. This is not proof that a part is faulty.</p></div>
-      ${nextLink(`#/s/${id}/repair`, "Repair costs")}</div>
+      ${nextLink(`#/s/${id}/costs`, "Continue")}</div>
     ${diagnosisBody(d)}
-    <div class="row no-print"><a class="btn" href="#/s/${id}/tests">Review tests</a><a class="btn" href="#/s/${id}/questions">Review answers</a>${nextLink(`#/s/${id}/repair`, "Repair costs")}</div>`);
+    <div class="row no-print"><a class="btn" href="#/s/${id}/tests">Review tests</a><a class="btn" href="#/s/${id}/questions">Review answers</a>${nextLink(`#/s/${id}/costs`, "Continue")}</div>`);
 }

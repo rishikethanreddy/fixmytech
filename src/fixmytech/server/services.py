@@ -42,6 +42,7 @@ class AppState:
     valuation_limiter: SlidingWindowLimiter
     partner_store: PartnerStore | None = None
     partner_limiter: SlidingWindowLimiter | None = None
+    market_limiter: SlidingWindowLimiter | None = None
     partner_clients: dict[tuple[str, str], FlipValueClient] = field(default_factory=dict)
 
 
@@ -68,6 +69,18 @@ class ValuationInput(BaseModel):
     repair_type: str | None = Field(default=None, description="Repair to value; defaults to the top candidate's")
     storage_gb: int | None = Field(default=None, ge=1, le=4096)
     age_months: int | None = Field(default=None, ge=0, le=240)
+
+
+class MarketCompareInput(BaseModel):
+    """FlipValue's repair-or-sell comparison. Values in major units of ``currency``; unknown values are omitted."""
+
+    currency: str = Field(pattern=r"^[A-Z]{3}$")
+    as_is_value: float | None = Field(default=None, ge=0, le=10_000_000)
+    after_repair_value: float | None = Field(default=None, ge=0, le=10_000_000)
+    repair_cost: float | None = Field(default=None, ge=0, le=10_000_000)
+    replacement_price: float | None = Field(default=None, ge=0, le=10_000_000)
+    selling_fee_pct: float = Field(default=0.0, ge=0, le=50)
+    selling_fixed_cost: float = Field(default=0.0, ge=0, le=1_000_000)
 
 
 class ManualValues(BaseModel):
